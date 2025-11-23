@@ -4,10 +4,10 @@ import Course from './screens/_tabs/Course';
 import Contact from './screens/_tabs/Contact';
 import About from './screens/_tabs/About';
 import { NavigationContainer } from '@react-navigation/native';
-import Feather from '@expo/vector-icons/Feather';
-import SimpleLineIcons from '@expo/vector-icons/SimpleLineIcons';
+import { Feather, Entypo, AntDesign, FontAwesome5 } from "@expo/vector-icons";
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import LoginScreen from './screens/LoginScreen';
+import Search from './screens/_tabs/Search';
 
 
 const Tabs = createBottomTabNavigator()
@@ -15,23 +15,56 @@ const Stack = createNativeStackNavigator()
 
 const TabNav = () => {
   return (
-      
-      <Tabs.Navigator initialRouteName='home'>
-      <Tabs.Screen name="home" component={Home} options={{
-        tabBarIcon: (focused) => <Feather name="home" size={25}/>,
-        headerShown:false
-      }}/>
-      <Tabs.Screen name='course' component={Course} options={{
-        tabBarIcon:(focused) => <SimpleLineIcons name="graduation" size={24} />
-      }}/>
-      <Tabs.Screen name='contact' component={Contact} options={{
-        tabBarIcon: (focused) => <Feather name="phone-call" size={24} color="black" />
-      }}/>
-      <Tabs.Screen name='about' component={About} options={{
-        tabBarIcon:(focused) =>  <Feather name="user" size={24} color="black" />
-      }}/>
+    <Tabs.Navigator initialRouteName="Featured" >
+      <Tabs.Screen
+        name="Featured"
+        component={Home}
+        options={{
+          tabBarIcon: (focused) => <Feather name="star" size={24} />,
+          headerShown: false,
+        }}
+      />
+      <Tabs.Screen
+        name="Search"
+        component={Search}
+        options={{
+          tabBarIcon: (focused) => (
+            <Entypo name="magnifying-glass" size={24} color="black" />
+          ),
+          headerShown: false,
+        }}
+      />
+      <Tabs.Screen
+        name="My Learning"
+        component={Search}
+        options={{
+          tabBarIcon: (focused) => (
+            <AntDesign name="play-circle" size={24} color="black" />
+          ),
+          headerShown: false,
+        }}
+      />
+
+      <Tabs.Screen
+        name="Wishlist"
+        component={Contact}
+        options={{
+          tabBarIcon: (focused) => (
+            <Feather name="heart" size={24} color="black" />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="Account"
+        component={About}
+        options={{
+          tabBarIcon: (focused) => (
+            <FontAwesome5 name="user-circle" size={24} color="black" />
+          ),
+        }}
+      />
     </Tabs.Navigator>
-  )
+  );
 }
 
 const StackNav = () => {
