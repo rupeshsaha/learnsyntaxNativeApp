@@ -1,12 +1,12 @@
 import { View, Text } from 'react-native'
 import React from 'react'
 
-const Contact = () => {
+const Account = () => {
   return (
     <View>
-      <Text>this is Contact page</Text>
+      <Text>Account</Text>
     </View>
   )
 }
 
-export default Contact
+export default Account
