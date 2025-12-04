@@ -1,9 +1,33 @@
 import { View, Text, ScrollView, Image } from "react-native";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Entypo, Feather } from "@expo/vector-icons";
+import { baseUrl } from "../../lib/constants";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const MyLearning = () => {
+   const [courses, setCourses] = useState("");
+
+   const fetchCourses = async () => {
+     try {
+       const res = await fetch(`${baseUrl}/Course/`, {
+         headers: {
+           Authorization: `Token ${await AsyncStorage.getItem("token")}`,
+         },
+       });
+       if (!res.ok) {
+         return console.log("Error while fetching category");
+       }
+       const data = await res.json();
+       setCourses(data);
+     } catch (error) {
+       console.log(error);
+     }
+   };
+
+   useEffect(() => {
+     fetchCourses();
+   }, []);
   return (
     <SafeAreaView
       style={{
@@ -26,17 +50,17 @@ const MyLearning = () => {
         <Text style={{ fontWeight: 700, fontSize: 20, color: "white" }}>
           My courses
         </Text>
-        {Array.from({ length: 12 }).map((_, i) => (
+        {courses && courses.map((course, i) => (
           <View key={i} style={{ flexDirection: "row", gap: 8 }}>
             <Image
-              source={{ uri: "https://picsum.photos/seed/CS101/300/160" }}
+              source={{ uri: course.image }}
               height={60}
               width={60}
               style={{ borderRadius: 10 }}
             />
-            <View>
+            <View style={{maxWidth:"80%"}}>
               <Text style={{ color: "white", fontWeight: 600, fontSize: 14 }}>
-                C++ Tutorial for begginers
+               {course.title}
               </Text>
               <Text style={{ color: "white", fontWeight: 300, fontSize: 11 }}>
                 John Purcell

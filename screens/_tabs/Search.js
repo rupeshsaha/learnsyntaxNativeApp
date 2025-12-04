@@ -1,9 +1,35 @@
 import { View, Text, TextInput } from "react-native";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Feather from "@expo/vector-icons/Feather";
+import { baseUrl } from "../../lib/constants";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const Search = () => {
+
+   const [categories, setCategories] = useState("");
+
+   const fetchCategories = async () => {
+     try {
+       const res = await fetch(`${baseUrl}/admin/category/`, {
+         headers: {
+           Authorization: `Token ${await AsyncStorage.getItem("token")}`,
+         },
+       });
+       if (!res.ok) {
+         return console.log("Error while fetching category");
+       }
+       const data = await res.json();
+       setCategories(data);
+     } catch (error) {
+       console.log(error);
+     }
+   };
+
+   useEffect(() => {
+     fetchCategories();
+   }, []);
+  
   return (
     <SafeAreaView
       style={{
@@ -162,54 +188,17 @@ const Search = () => {
         >
           Browse Categories
         </Text>
+        {categories && categories.map((category) => (
+          
         <View style={{ justifyContent: "space-between", flexDirection: "row" }}>
           <Text style={{ color: "white", fontSize: 16 }}>
-            Software Development
+           {category.name}
           </Text>
           <Feather name="arrow-right" size={24} color="white" />
         </View>
-        <View style={{ justifyContent: "space-between", flexDirection: "row" }}>
-          <Text style={{ color: "white", fontSize: 16 }}>Web Development</Text>
-          <Feather name="arrow-right" size={24} color="white" />
-        </View>
-        <View style={{ justifyContent: "space-between", flexDirection: "row" }}>
-          <Text style={{ color: "white", fontSize: 16 }}>App Development</Text>
-          <Feather name="arrow-right" size={24} color="white" />
-        </View>
-        <View style={{ justifyContent: "space-between", flexDirection: "row" }}>
-          <Text style={{ color: "white", fontSize: 16 }}>Software Design</Text>
-          <Feather name="arrow-right" size={24} color="white" />
-        </View>
-        <View style={{ justifyContent: "space-between", flexDirection: "row" }}>
-          <Text style={{ color: "white", fontSize: 16 }}>
-            Software Development
-          </Text>
-          <Feather name="arrow-right" size={24} color="white" />
-        </View>
-        <View style={{ justifyContent: "space-between", flexDirection: "row" }}>
-          <Text style={{ color: "white", fontSize: 16 }}>
-            Software Development
-          </Text>
-          <Feather name="arrow-right" size={24} color="white" />
-        </View>
-        <View style={{ justifyContent: "space-between", flexDirection: "row" }}>
-          <Text style={{ color: "white", fontSize: 16 }}>
-            Software Development
-          </Text>
-          <Feather name="arrow-right" size={24} color="white" />
-        </View>
-        <View style={{ justifyContent: "space-between", flexDirection: "row" }}>
-          <Text style={{ color: "white", fontSize: 16 }}>
-            Software Development
-          </Text>
-          <Feather name="arrow-right" size={24} color="white" />
-        </View>
-        <View style={{ justifyContent: "space-between", flexDirection: "row" }}>
-          <Text style={{ color: "white", fontSize: 16 }}>
-            Software Development
-          </Text>
-          <Feather name="arrow-right" size={24} color="white" />
-        </View>
+        ))}
+         
+       
       </View>
     </SafeAreaView>
   );

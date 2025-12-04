@@ -2,33 +2,57 @@ import { View, Text, ScrollView } from "react-native";
 import React, { useEffect, useState } from "react";
 import CourseCard from "./CourseCard";
 import { courses as data } from "../data";
+import { PURPLE } from "../lib/constants";
 
-const CourseList = () => {
+const CourseList = ({category, headingTitle}) => {
   const [courses, setCourses] = useState([]);
 
   useEffect(() => {
-    // const fetchData = async () => {
-    //   const res = await fetch("https://learnsyntax.tymiqly.com/api/courses");
-    //   const data = await res.json();
-    //   if (data) {
-    //     setCourses(data);
-    //   }
-    // };
-    // fetchData();
+  
     setCourses(data)
   }, []);
   return (
     <View>
-      <Text
-        style={{
-          fontWeight: "700",
-          fontSize: 23,
-          color: "white",
-          marginBottom: 20,
-        }}
-      >
-        Recommended for you
-      </Text>
+      {category && !headingTitle && (
+        <View style={{ flexDirection: "row", gap: 6 }}>
+          <Text
+            style={{
+              fontWeight: "700",
+              fontSize: 23,
+              color: "white",
+              marginBottom: 20,
+            }}
+          >
+            Top courses in
+          </Text>
+          <Text
+            style={{
+              fontWeight: "700",
+              fontSize: 23,
+              color: PURPLE,
+              marginBottom: 20,
+              
+              
+            }}
+          >
+            {category?.name}
+          </Text>
+        </View>
+      )}
+
+      {headingTitle && !category && (
+        <Text
+          style={{
+            fontWeight: "700",
+            fontSize: 23,
+            color: "white",
+            marginBottom: 20,
+          }}
+        >
+          {headingTitle}
+        </Text>
+      )}
+
       <ScrollView horizontal contentContainerStyle={{ gap: 15, height: 300 }}>
         {courses &&
           courses.map((course, i) => <CourseCard key={i} course={course} />)}
