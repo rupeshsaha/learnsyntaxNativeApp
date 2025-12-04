@@ -2,39 +2,57 @@ import { View, Text, TextInput, Pressable } from "react-native";
 import React, { useState } from "react";
 import { Feather, AntDesign } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
-import { PURPLE } from "../lib/constants";
+import { baseUrl, PURPLE } from "../lib/constants";
+import Toast from "react-native-toast-message";
 
-
-const LoginScreen = () => {
+const RegisterScreen = () => {
   const navigation = useNavigation();
 
-  const [username, setUsername] = useState("")
-  const [password, setPassword] = useState("")
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("");
 
-  const handleLogin = async() => {
+  const handleRegister = async () => {
     try {
-      const res = await fetch("https://api.zxconline.com/api/login/", {
+      if (!username?.trim() || !password?.trim() || !email?.trim()) {
+        return Toast.show({
+          type: "error",
+          text1: "Error",
+          text2: "All fields are required",
+        });
+      }
+      const res = await fetch(`${baseUrl}/User/`, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
-        username,
-        password
-      })
-      })
-      if (res.ok) {
-        
-        navigation.navigate("main")
-      }
+          username,
+          email,
+          password,
+        }),
+      });
       const data = await res.json();
 
-      console.log(data)
+      if (!res.ok) {
+        Toast.show({
+                type: "error",
+                text1: "Error",
+                text2: "Error creating account",
+        });
+        console.log(data)
+      }
+      Toast.show({
+              type: "success",
+              text1: "Success",
+              text2: "Account created successfully",
+            });
+      navigation.navigate("login", { data: { username, password } });
     } catch (error) {
       console.log(error);
-      alert("error while login", error)
+      alert("error while creating account", error);
     }
-  }
+  };
 
   return (
     <View
@@ -55,7 +73,7 @@ const LoginScreen = () => {
           marginBottom: 20,
         }}
       >
-        Log in to continue your learning journey
+        Create account to get started
       </Text>
       <TextInput
         style={{
@@ -63,7 +81,7 @@ const LoginScreen = () => {
           minWidth: "90%",
           borderBottomWidth: 2,
           borderBottomColor: "white",
-          color:"white"
+          color: "white",
         }}
         placeholderTextColor={"white"}
         placeholder="Username"
@@ -76,7 +94,20 @@ const LoginScreen = () => {
           minWidth: "90%",
           borderBottomWidth: 2,
           borderBottomColor: "white",
-          color:"white"
+          color: "white",
+        }}
+        placeholderTextColor={"white"}
+        placeholder="Email"
+        value={email}
+        onChangeText={setEmail}
+      />
+      <TextInput
+        style={{
+          height: 40,
+          minWidth: "90%",
+          borderBottomWidth: 2,
+          borderBottomColor: "white",
+          color: "white",
         }}
         secureTextEntry
         placeholderTextColor={"white"}
@@ -85,7 +116,7 @@ const LoginScreen = () => {
         onChangeText={setPassword}
       />
       <Pressable
-        onPress={() => handleLogin()}
+        onPress={() => handleRegister()}
         style={{
           backgroundColor: PURPLE,
           width: "90%",
@@ -96,9 +127,8 @@ const LoginScreen = () => {
           gap: 8,
         }}
       >
-        <Feather name="mail" size={18} color="white" />
         <Text style={{ color: "white", fontSize: 18, fontWeight: 700 }}>
-          Log in with email
+          Create Account
         </Text>
       </Pressable>
       <View
@@ -113,7 +143,7 @@ const LoginScreen = () => {
           style={{ height: 1, width: "30%", backgroundColor: "white" }}
         ></View>
         <Text style={{ color: "white", fontSize: 14 }}>
-          Other login options
+          Other options to get started
         </Text>
         <View
           style={{ height: 1, width: "30%", backgroundColor: "white" }}
@@ -130,8 +160,14 @@ const LoginScreen = () => {
           <AntDesign name="apple" size={20} color="white" />
         </View>
       </View>
+      <View style={{ flexDirection: "row" }}>
+        <Text style={{ color: "white" }}>Already have an account ? </Text>
+        <Pressable onPress={() => navigation.navigate("login")}>
+          <Text style={{ color: PURPLE, fontWeight: "bold" }}>Log in</Text>
+        </Pressable>
+      </View>
     </View>
   );
 };
 
-export default LoginScreen;
+export default RegisterScreen;

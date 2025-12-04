@@ -2,39 +2,62 @@ import { View, Text, TextInput, Pressable } from "react-native";
 import React, { useState } from "react";
 import { Feather, AntDesign } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
-import { PURPLE } from "../lib/constants";
+import { baseUrl, PURPLE } from "../lib/constants";
+import Toast from "react-native-toast-message";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-
-const LoginScreen = () => {
+const LoginScreen = ({ route }) => {
+const data = route?.params?.data;
   const navigation = useNavigation();
 
-  const [username, setUsername] = useState("")
-  const [password, setPassword] = useState("")
+  const [username, setUsername] = useState(data?.username ?? "");
+  const [password, setPassword] = useState(data?.password ?? "");
 
-  const handleLogin = async() => {
+  const handleLogin = async () => {
     try {
-      const res = await fetch("https://api.zxconline.com/api/login/", {
+      if (!username?.trim() || !password?.trim()) {
+        return Toast.show({
+          type: "error",
+          text1: "Error",
+          text2: "All fields are required",
+        });
+      }
+      const res = await fetch(`${baseUrl}/login/`, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
-        username,
-        password
-      })
-      })
-      if (res.ok) {
-        
-        navigation.navigate("main")
-      }
+          username,
+          password,
+        }),
+      });
       const data = await res.json();
 
-      console.log(data)
+      if (!res.ok) {
+        return Toast.show({
+          type: "error",
+          text1: "Error",
+          text2: `${
+            data.non_field_errors[0] || data.password[0] || data.username[0]
+          }`,
+        });
+      }
+
+      Toast.show({
+        type: "success",
+        text1: "Success",
+        text2: "Logged in successfully",
+      });
+
+      await AsyncStorage.setItem("token", data.token);
+      navigation.navigate("main");
     } catch (error) {
       console.log(error);
-      alert("error while login", error)
+
+      alert("Error while login", error);
     }
-  }
+  };
 
   return (
     <View
@@ -63,7 +86,7 @@ const LoginScreen = () => {
           minWidth: "90%",
           borderBottomWidth: 2,
           borderBottomColor: "white",
-          color:"white"
+          color: "white",
         }}
         placeholderTextColor={"white"}
         placeholder="Username"
@@ -76,7 +99,7 @@ const LoginScreen = () => {
           minWidth: "90%",
           borderBottomWidth: 2,
           borderBottomColor: "white",
-          color:"white"
+          color: "white",
         }}
         secureTextEntry
         placeholderTextColor={"white"}
@@ -96,9 +119,8 @@ const LoginScreen = () => {
           gap: 8,
         }}
       >
-        <Feather name="mail" size={18} color="white" />
         <Text style={{ color: "white", fontSize: 18, fontWeight: 700 }}>
-          Log in with email
+          Log in
         </Text>
       </Pressable>
       <View
@@ -129,6 +151,14 @@ const LoginScreen = () => {
         <View style={{ borderWidth: 2, borderColor: "white", padding: 8 }}>
           <AntDesign name="apple" size={20} color="white" />
         </View>
+      </View>
+      <View style={{ flexDirection: "row" }}>
+        <Text style={{ color: "white" }}>Don't have an account ? </Text>
+        <Pressable onPress={() => navigation.navigate("register")}>
+          <Text style={{ color: PURPLE, fontWeight: "bold" }}>
+            Create Account
+          </Text>
+        </Pressable>
       </View>
     </View>
   );

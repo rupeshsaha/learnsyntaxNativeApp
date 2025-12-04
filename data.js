@@ -145,44 +145,108 @@ export const courses = [
 
 export const SECTIONS = [
   {
-    id: '1',
-    title: 'Introduction',
-    duration: '18m',
+    id: "1",
+    title: "Introduction",
+    duration: "18m",
     lessons: [
-      { id: '1', title: 'Welcome', duration: '2:05', locked: false, completed: true },
-      { id: '2', title: 'Course Overview', duration: '3:10', locked: false },
-      { id: '3', title: 'How This Course Works', duration: '4:20', locked: false },
+      {
+        id: "1",
+        title: "Welcome",
+        duration: "2:05",
+        locked: false,
+        completed: true,
+      },
+      { id: "2", title: "Course Overview", duration: "3:10", locked: false },
+      {
+        id: "3",
+        title: "How This Course Works",
+        duration: "4:20",
+        locked: false,
+      },
     ],
   },
   {
-    id: '2',
-    title: 'Core Concepts',
-    duration: '1h 20m',
+    id: "2",
+    title: "Core Concepts",
+    duration: "1h 20m",
     lessons: [
-      { id: '4', title: 'State & Props', duration: '12:30', locked: false },
-      { id: '5', title: 'Lifecycle Methods', duration: '18:00', locked: true },
-      { id: '6', title: 'Reusable Components', duration: '10:45', locked: false },
+      { id: "4", title: "State & Props", duration: "12:30", locked: false },
+      { id: "5", title: "Lifecycle Methods", duration: "18:00", locked: true },
+      {
+        id: "6",
+        title: "Reusable Components",
+        duration: "10:45",
+        locked: false,
+      },
     ],
   },
   {
-    id: '3',
-    title: 'Advanced Techniques',
-    duration: '2h 05m',
+    id: "3",
+    title: "Advanced Techniques",
+    duration: "2h 05m",
     lessons: [
-      { id: '7', title: 'Hooks Deep Dive', duration: '22:15', locked: false },
-      { id: '8', title: 'Context API', duration: '17:40', locked: false },
-      { id: '9', title: 'Performance Optimization', duration: '28:30', locked: true },
+      { id: "7", title: "Hooks Deep Dive", duration: "22:15", locked: false },
+      { id: "8", title: "Context API", duration: "17:40", locked: false },
+      {
+        id: "9",
+        title: "Performance Optimization",
+        duration: "28:30",
+        locked: true,
+      },
     ],
   },
   {
-    id: '4',
-    title: 'Project & Wrap Up',
-    duration: '48m',
+    id: "4",
+    title: "Project & Wrap Up",
+    duration: "48m",
     lessons: [
-      { id: '10', title: 'Build Mini Project', duration: '25:10', locked: false },
-      { id: '11', title: 'Common Mistakes to Avoid', duration: '12:00', locked: false },
-      { id: '12', title: 'Final Thoughts', duration: '6:40', locked: false, completed: true },
+      {
+        id: "10",
+        title: "Build Mini Project",
+        duration: "25:10",
+        locked: false,
+      },
+      {
+        id: "11",
+        title: "Common Mistakes to Avoid",
+        duration: "12:00",
+        locked: false,
+      },
+      {
+        id: "12",
+        title: "Final Thoughts",
+        duration: "6:40",
+        locked: false,
+        completed: true,
+      },
     ],
   },
 ];
 
+export const accountMenus = [
+  {
+    title: "Video Preferences",
+    submenus: ["Download options", "Video playback options"],
+  },
+  {
+    title: "Account settings",
+    submenus: [
+      "Career goal",
+      "Account security",
+      "Email notification preferences",
+      "Learning reminders",
+    ],
+  },
+  {
+    title: "Help and Support",
+    submenus: [
+      "About LearnSyntax",
+      "Frequently asked questions",
+      "Share the LearnSyntax app",
+    ],
+  },
+  {
+    title: "Diagnostics",
+    submenus: ["Status"],
+  },
+];

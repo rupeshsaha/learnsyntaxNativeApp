@@ -13,7 +13,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 const CustomHeader = ({ navigation, route }) => {
   const routeName = getFocusedRouteNameFromRoute(route) ?? route.name;
-  console.log(routeName)
 
   const { items } = useContext(CartContext);
   return (

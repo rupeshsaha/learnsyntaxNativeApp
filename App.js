@@ -12,8 +12,13 @@ import Account from "./screens/_tabs/Account";
 import CourseDetails from "./screens/CourseDetails";
 import CustomHeader from "./components/Header";
 import Cart from "./screens/Cart";
-import { createContext, useMemo, useState } from "react";
+import { createContext, useEffect, useMemo, useState } from "react";
 import Checkout from "./screens/Checkout";
+import RegisterScreen from "./screens/RegisterScreen";
+import Toast, { BaseToast, ErrorToast } from "react-native-toast-message";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { ActivityIndicator, View } from "react-native";
+import { baseUrl } from "./lib/constants";
 
 const Tabs = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -29,25 +34,26 @@ const TabNav = () => {
   return (
     <Tabs.Navigator
       initialRouteName="Featured"
-      screenOptions={{ tabBarStyle: { backgroundColor: "black", height:60 } }}
+      screenOptions={{
+        tabBarStyle: { backgroundColor: "black", height: 70,alignItems:"center" },
+        headerShown: false,
+      }}
     >
       <Tabs.Screen
         name="Featured"
         component={Featured}
         options={{
           tabBarIcon: (focused) => (
-            <Feather name="star" size={26} color="white" />
+            <Feather name="star" size={28} color="white" />
           ),
-          headerShown: false,
         }}
       />
       <Tabs.Screen
         name="Search"
         component={Search}
         options={{
-          headerShown: false,
           tabBarIcon: (focused) => (
-            <Entypo name="magnifying-glass" size={26} color="white" />
+            <Entypo name="magnifying-glass" size={28} color="white" />
           ),
         }}
       />
@@ -56,9 +62,8 @@ const TabNav = () => {
         component={MyLearning}
         options={{
           tabBarIcon: (focused) => (
-            <AntDesign name="play-circle" size={26} color="white" />
+            <AntDesign name="play-circle" size={28} color="white" />
           ),
-          headerShown: false,
         }}
       />
 
@@ -67,7 +72,7 @@ const TabNav = () => {
         component={Wishlist}
         options={{
           tabBarIcon: (focused) => (
-            <Feather name="heart" size={26} color="white" />
+            <Feather name="heart" size={28} color="white" />
           ),
         }}
       />
@@ -76,7 +81,7 @@ const TabNav = () => {
         component={Account}
         options={{
           tabBarIcon: (focused) => (
-            <FontAwesome5 name="user-circle" size={26} color="white" />
+            <FontAwesome5 name="user-circle" size={28} color="white" />
           ),
         }}
       />
@@ -84,7 +89,7 @@ const TabNav = () => {
   );
 };
 
-const StackNav = () => {
+const StackNav = ({ isLoggedIn }) => {
   const [items, setItems] = useState([]);
 
   const value = useMemo(
@@ -104,10 +109,17 @@ const StackNav = () => {
   return (
     <CartContext.Provider value={value}>
       <NavigationContainer>
-        <Stack.Navigator initialRouteName="login">
+        <Stack.Navigator initialRouteName={isLoggedIn ? "main" : "login"}>
           <Stack.Screen
             name="login"
             component={LoginScreen}
+            options={{
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen
+            name="register"
+            component={RegisterScreen}
             options={{
               headerShown: false,
             }}
@@ -143,10 +155,93 @@ const StackNav = () => {
   );
 };
 
+const toastConfig = {
+  success: (props) => (
+    <BaseToast
+      {...props}
+      style={{ borderLeftColor: "#22c55e", height: 80 }}
+      contentContainerStyle={{ paddingHorizontal: 20 }}
+      text1Style={{
+        fontSize: 18,
+        fontWeight: "bold",
+      }}
+      text2Style={{
+        fontSize: 15,
+        color:"green"
+      }}
+    />
+  ),
+
+  error: (props) => (
+    <ErrorToast
+      {...props}
+      style={{ height: 80, borderLeftColor: "#ff0000ff" }}
+      text1Style={{
+        fontSize: 18,
+        fontWeight: "bold",
+      }}
+      text2Style={{
+        fontSize: 15,
+        color:"red"
+      }}
+    />
+  ),
+};
+
 export default function App() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  const getCurrentUser = async () => {
+    try {
+      const token = await AsyncStorage.getItem("token");
+
+      if (!token) {
+        console.log("No token found");
+        setIsLoggedIn(false);
+        return;
+      }
+
+      const res = await fetch(`${baseUrl}/User/me`, {
+        headers: {
+          Authorization: `Token ${token}`,
+        },
+      });
+
+      if (!res.ok) {
+        console.log("Token invalid, clearing");
+        await AsyncStorage.removeItem("token");
+        setIsLoggedIn(false);
+        return;
+      }
+
+      const data = await res.json();
+
+      setIsLoggedIn(true);
+    } catch (err) {
+      console.log("Auth crash:", err.message);
+      setIsLoggedIn(false);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    getCurrentUser();
+  }, []);
+
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  }
+
   return (
     <>
-      <StackNav />
+      <StackNav isLoggedIn={isLoggedIn} />
+      <Toast config={toastConfig} />
     </>
   );
 }
