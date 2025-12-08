@@ -22,24 +22,25 @@ const data = route?.params?.data;
           text2: "All fields are required",
         });
       }
-      const res = await fetch(`${baseUrl}/login/`, {
+      const res = await fetch(`${baseUrl}/auth/login/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          username,
+          email:username,
           password,
         }),
       });
       const data = await res.json();
+      
 
       if (!res.ok) {
         return Toast.show({
           type: "error",
           text1: "Error",
           text2: `${
-            data.non_field_errors[0] || data.password[0] || data.username[0]
+            data.error
           }`,
         });
       }
@@ -66,20 +67,28 @@ const data = route?.params?.data;
         alignItems: "center",
         backgroundColor: "black",
         minHeight: "100%",
-        gap: 25,
+        gap: 15,
       }}
     >
-      <Text
+      <View
         style={{
-          fontWeight: 700,
-          fontSize: 20,
-          color: "white",
-          textAlign: "center",
-          marginBottom: 20,
+          justifyContent: "center",
+          alignItems: "center",
+          gap: 25,
         }}
       >
-        Log in to continue your learning journey
-      </Text>
+        <Text
+          style={{
+            fontWeight: 700,
+            fontSize: 20,
+            color: "white",
+            textAlign: "center",
+            marginBottom: 20,
+          }}
+        >
+          Log in to continue your learning journey
+        </Text>
+      </View>
       <TextInput
         style={{
           height: 40,
@@ -107,6 +116,16 @@ const data = route?.params?.data;
         value={password}
         onChangeText={setPassword}
       />
+
+      <Pressable
+        onPress={()=> navigation.navigate("forgotpassword")}
+        style={{  width: "95%", alignItems: "flex-end" }}
+      >
+        <Text style={{ color: PURPLE, fontWeight: "bold", fontSize: 14 }}>
+          Forgot Password ?
+        </Text>
+      </Pressable>
+
       <Pressable
         onPress={() => handleLogin()}
         style={{

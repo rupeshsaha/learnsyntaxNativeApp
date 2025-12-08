@@ -7,11 +7,30 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const Search = () => {
 
-   const [categories, setCategories] = useState("");
+  const [categories, setCategories] = useState("");
+  const [subCategories, setSubCategories] = useState("");
+
+
+    const fetchSubCategories = async () => {
+      try {
+        const res = await fetch(`${baseUrl}/subcategory/`, {
+          headers: {
+            Authorization: `Token ${await AsyncStorage.getItem("token")}`,
+          },
+        });
+        if (!res.ok) {
+          return console.log("Error while fetching category");
+        }
+        const data = await res.json();
+        setSubCategories(data);
+      } catch (error) {
+        console.log(error);
+      }
+    };
 
    const fetchCategories = async () => {
      try {
-       const res = await fetch(`${baseUrl}/admin/category/`, {
+       const res = await fetch(`${baseUrl}/category/`, {
          headers: {
            Authorization: `Token ${await AsyncStorage.getItem("token")}`,
          },
@@ -28,6 +47,7 @@ const Search = () => {
 
    useEffect(() => {
      fetchCategories();
+     fetchSubCategories();
    }, []);
   
   return (
@@ -42,7 +62,7 @@ const Search = () => {
       
 
       <View style={{ paddingHorizontal: 8, gap: 10 }}>
-        <Text style={{ fontWeight: 700, fontSize: 16, color: "white" }}>
+        <Text style={{ fontWeight: 700, fontSize: 16, color: "white", marginTop:10 }}>
           Top searches
         </Text>
         <View
@@ -55,125 +75,27 @@ const Search = () => {
             gap: 8,
           }}
         >
-          <View
+          {subCategories && subCategories.map((subCategory, i) => (
+            
+            <View
+              key={i}
             style={{
               borderWidth: 2,
               borderColor: "white",
               borderRadius: 30,
               paddingVertical: 10,
               paddingHorizontal: 20,
-              maxWidth: 100,
               alignItems: "center",
               justifyContent: "center",
               height: 50,
             }}
           >
             <Text style={{ fontWeight: 700, fontSize: 14, color: "white" }}>
-              Python
+              {subCategory.name}
             </Text>
           </View>
-          <View
-            style={{
-              borderWidth: 2,
-              borderColor: "white",
-              borderRadius: 30,
-              paddingVertical: 10,
-              paddingHorizontal: 20,
-              maxWidth: 100,
-              alignItems: "center",
-              justifyContent: "center",
-              height: 50,
-            }}
-          >
-            <Text style={{ fontWeight: 700, fontSize: 14, color: "white" }}>
-              Python
-            </Text>
-          </View>
-          <View
-            style={{
-              borderWidth: 2,
-              borderColor: "white",
-              borderRadius: 30,
-              paddingVertical: 10,
-              paddingHorizontal: 20,
-              maxWidth: 100,
-              alignItems: "center",
-              justifyContent: "center",
-              height: 50,
-            }}
-          >
-            <Text style={{ fontWeight: 700, fontSize: 14, color: "white" }}>
-              Python
-            </Text>
-          </View>
-          <View
-            style={{
-              borderWidth: 2,
-              borderColor: "white",
-              borderRadius: 30,
-              paddingVertical: 10,
-              paddingHorizontal: 20,
-              maxWidth: 100,
-              alignItems: "center",
-              justifyContent: "center",
-              height: 50,
-            }}
-          >
-            <Text style={{ fontWeight: 700, fontSize: 14, color: "white" }}>
-              Python
-            </Text>
-          </View>
-          <View
-            style={{
-              borderWidth: 2,
-              borderColor: "white",
-              borderRadius: 30,
-              paddingVertical: 10,
-              paddingHorizontal: 20,
-              maxWidth: 100,
-              alignItems: "center",
-              justifyContent: "center",
-              height: 50,
-            }}
-          >
-            <Text style={{ fontWeight: 700, fontSize: 14, color: "white" }}>
-              Python
-            </Text>
-          </View>
-          <View
-            style={{
-              borderWidth: 2,
-              borderColor: "white",
-              borderRadius: 30,
-              paddingVertical: 10,
-              paddingHorizontal: 20,
-              maxWidth: 100,
-              alignItems: "center",
-              justifyContent: "center",
-              height: 50,
-            }}
-          >
-            <Text style={{ fontWeight: 700, fontSize: 14, color: "white" }}>
-              Python
-            </Text>
-          </View>
-          <View
-            style={{
-              borderWidth: 2,
-              borderColor: "white",
-              borderRadius: 30,
-              paddingVertical: 10,
-              paddingHorizontal: 20,
-              maxWidth: 100,
-              alignItems: "center",
-              justifyContent: "center",
-              height: 50,
-            }}
-          >
-            <Text style={{ fontWeight: 700, fontSize: 14, color: "white" }}>
-              Python
-            </Text>
-          </View>
+          ))}
+         
         </View>
       </View>
 
@@ -183,14 +105,14 @@ const Search = () => {
             color: "white",
             fontWeight: 700,
             fontSize: 16,
-            marginBottom: 20,
+            marginTop:20
           }}
         >
           Browse Categories
         </Text>
-        {categories && categories.map((category) => (
+        {categories && categories.map((category, i) => (
           
-        <View style={{ justifyContent: "space-between", flexDirection: "row" }}>
+        <View key={i} style={{ justifyContent: "space-between", flexDirection: "row" }}>
           <Text style={{ color: "white", fontSize: 16 }}>
            {category.name}
           </Text>

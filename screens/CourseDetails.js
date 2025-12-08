@@ -52,7 +52,7 @@ const CourseDetails = ({ route }) => {
       <ScrollView contentContainerStyle={{ gap: 10 }}>
         <Image
           source={{
-            uri: data.image,
+            uri: data.image_url,
           }}
           height={240}
           width={"100%"}
@@ -80,7 +80,7 @@ const CourseDetails = ({ route }) => {
           </View>
 
           <View style={{ flexDirection: "row", gap: 6, alignItems: "center" }}>
-            {levelIcons[data.level.toLowerCase()] || null}
+            {levelIcons[data?.level?.toLowerCase()] || null}
 
             <Text style={{ color: "white", fontSize: 14 }}>{data.level}</Text>
           </View>

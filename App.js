@@ -19,6 +19,7 @@ import Toast, { BaseToast, ErrorToast } from "react-native-toast-message";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { ActivityIndicator, View } from "react-native";
 import { baseUrl } from "./lib/constants";
+import ForgotPasswordScreen from "./screens/ForgotPasswordScreen";
 
 const Tabs = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -125,6 +126,13 @@ const StackNav = ({ isLoggedIn }) => {
             }}
           />
           <Stack.Screen
+            name="forgotpassword"
+            component={ForgotPasswordScreen}
+            options={{
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen
             name="main"
             component={TabNav}
             options={{
@@ -202,7 +210,7 @@ export default function App() {
         return;
       }
 
-      const res = await fetch(`${baseUrl}/User/me`, {
+      const res = await fetch(`${baseUrl}/user/me`, {
         headers: {
           Authorization: `Token ${token}`,
         },

@@ -1,28 +1,42 @@
-import { View, Text, TextInput, Image, Pressable } from "react-native";
-import React, { useState } from "react";
+import { View, Text, TextInput, Image, Pressable, ScrollView } from "react-native";
+import React, { useContext, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Fontisto, AntDesign, FontAwesome } from "@expo/vector-icons";
+import CartItem from "../components/CartItem";
+import { CartContext } from "../App";
+import { PURPLE } from "../lib/constants";
 
 const Checkout = () => {
-    const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("cards")
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("cards");
 
-    const handlePaymentMethodSelect = (method) => {
-        setSelectedPaymentMethod(method.toLowerCase());
-    }
+  const handlePaymentMethodSelect = (method) => {
+    setSelectedPaymentMethod(method.toLowerCase());
+  };
 
-    const isSelected = (method) => selectedPaymentMethod === method;
-
+  const isSelected = (method) => selectedPaymentMethod === method;
+  const { items } = useContext(CartContext);
+  const total = items.reduce((sum, item) => {
+    return Number(sum) + Number(item.price);
+  }, 0);
 
   return (
     <SafeAreaView
       style={{
         backgroundColor: "black",
         height: "100%",
-        paddingHorizontal: 10,
-        gap: 18,
+        padding:10
+        
+       
       }}
     >
       {/* billing address section */}
+      <ScrollView contentContainerStyle={{
+        gap: 24,
+        paddingBottom: 120,
+        
+        
+        
+      }}>
       <View style={{ gap: 14 }}>
         <Text style={{ color: "white", fontWeight: "bold", fontSize: 18 }}>
           Billing address
@@ -60,7 +74,7 @@ const Checkout = () => {
       </View>
 
       {/* Payment methods section */}
-      <View style={{gap:14}}>
+      <View style={{ gap: 14 }}>
         <Text style={{ color: "white", fontWeight: "bold", fontSize: 18 }}>
           Payment method
         </Text>
@@ -174,6 +188,77 @@ const Checkout = () => {
             <Text style={{ color: "white" }}>Mobile Wallets</Text>
           </Pressable>
         </View>
+      </View>
+
+      <View style={{ gap: 14 }}>
+        <Text
+          style={{
+            color: "white",
+            fontWeight: "bold",
+            fontSize: 18,
+            
+          }}
+        >
+          Order details ({items.length} course{items.length > 1 ? "s" : ""})
+        </Text>
+        {items &&
+          items.map((item, i) => (
+            <CartItem key={i} data={item} isCheckoutPage={true} />
+          ))}
+      </View>
+
+      </ScrollView>
+
+      <View
+        style={{
+          position: "absolute",
+          bottom: 0,
+          left: 0,
+          right: 0,
+          height: 150,
+          minWidth:"105%",
+          gap: 20,
+          justifyContent:"space-around",
+          alignItems: "center",
+          backgroundColor: "#272727ff",
+          width: "100%",
+        }}
+      >
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            paddingHorizontal: 20,
+            width: "100%",
+          }}
+        >
+          <Text style={{ color: "white", fontSize: 16, fontWeight: "600" }}>
+            Total:
+          </Text>
+          <Text style={{ color: "white", fontSize: 16, fontWeight: "600" }}>
+            ₹{total}
+          </Text>
+        </View>
+        <Pressable
+          onPress={() => navigation.navigate("Checkout")}
+          style={{
+            backgroundColor: PURPLE,
+            alignItems: "center",
+            justifyContent: "center",
+            paddingHorizontal: 20,
+            paddingVertical: 10,
+            flexDirection: "row",
+            minWidth: "90%",
+            marginBottom:10,
+            gap: 4,
+            borderRadius: 6,
+          }}
+        >
+          <FontAwesome name="lock" color="white" size={22} />
+          <Text style={{ color: "white", fontSize: 20, fontWeight: "bold" }}>
+            Pay Now
+          </Text>
+        </Pressable>
       </View>
     </SafeAreaView>
   );

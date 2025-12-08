@@ -35,18 +35,21 @@ const AccountMenu = ({menu}) => {
 const Account = () => {
   const [user, setUser] = useState();
   const getCurrentUser = async () => {
-    const token = await AsyncStorage.getItem("token");
-    const res = await fetch(`${baseUrl}/User/me`, {
-      headers: {
-        Authorization: `Token ${token}`,
-      },
-    });
-    const data = await res.json();
-    if (!res.ok) {
-      console.log(token);
-      alert(data.detail ?? "Error while getting logged in user");
+    try {
+      const token = await AsyncStorage.getItem("token");
+      const res = await fetch(`${baseUrl}/user/me`, {
+        headers: {
+          Authorization: `Token ${token}`,
+        },
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        alert(data.detail ?? "Error while getting logged in user");
+      }
+      setUser(data);
+    } catch (error) {
+      console.log(error)
     }
-    setUser(data);
   };
 
 

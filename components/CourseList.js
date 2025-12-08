@@ -1,15 +1,24 @@
 import { View, Text, ScrollView } from "react-native";
 import React, { useEffect, useState } from "react";
 import CourseCard from "./CourseCard";
-import { courses as data } from "../data";
-import { PURPLE } from "../lib/constants";
+import { baseUrl, PURPLE } from "../lib/constants";
 
 const CourseList = ({category, headingTitle}) => {
   const [courses, setCourses] = useState([]);
 
+  const fetchCourses = async () => {
+   try {
+     const res = await fetch(`${baseUrl}/course/`)
+     const data = await res.json();
+     setCourses(data)
+   } catch (error) {
+    console.log(error)
+   }
+  }
+
   useEffect(() => {
-  
-    setCourses(data)
+    
+    fetchCourses()
   }, []);
   return (
     <View>

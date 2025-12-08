@@ -12,7 +12,7 @@ const CourseCard = ({ course }) => {
         onPress={() => navigation.navigate("Course details", { data: course })}
       >
         <Image
-          source={{ uri: course.image }}
+          source={{ uri: course.image_url }}
           height={150}
           width={230}
           style={{ borderRadius: 10 }}
@@ -26,10 +26,15 @@ const CourseCard = ({ course }) => {
       </Text>
       <Text style={{ color: "white", fontSize: 12 }}>{course.level}</Text>
         <Rating ratingValue={4.5}/>
-    
+      <View style={{flexDirection:"row", gap:8, alignItems:"center"}}>
+        
       <Text style={{ fontWeight: 700, fontSize: 16, color: "white" }}>
+        ₹{course.discount_price}
+      </Text>
+      <Text style={{ fontWeight: 400, fontSize: 14, color: "rgba(176, 176, 176, 1)" ,textDecorationLine:"line-through"}}>
         ₹{course.price}
       </Text>
+    </View>
     </View>
   );
 };

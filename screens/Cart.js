@@ -29,7 +29,7 @@ const Cart = () => {
       style={{
         backgroundColor: "black",
         height: "100%",
-        paddingHorizontal: 10,
+        padding: 10,
         gap: 10,
       }}
     >

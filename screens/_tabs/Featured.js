@@ -12,7 +12,7 @@ const Featured = () => {
 
    const fetchCategories = async () => {
      try {
-       const res = await fetch(`${baseUrl}/admin/category/`, {
+       const res = await fetch(`${baseUrl}/category/`, {
          headers: {
            "Authorization" : `Token ${await AsyncStorage.getItem("token")}`
          }

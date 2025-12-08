@@ -10,7 +10,7 @@ const MyLearning = () => {
 
    const fetchCourses = async () => {
      try {
-       const res = await fetch(`${baseUrl}/Course/`, {
+       const res = await fetch(`${baseUrl}/course/`, {
          headers: {
            Authorization: `Token ${await AsyncStorage.getItem("token")}`,
          },
