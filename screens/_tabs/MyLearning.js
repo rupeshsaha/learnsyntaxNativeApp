@@ -2,7 +2,7 @@ import { View, Text, ScrollView, Image } from "react-native";
 import React, { useEffect, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Entypo, Feather } from "@expo/vector-icons";
-import { baseUrl } from "../../lib/constants";
+import { baseUrl, PURPLE } from "../../lib/constants";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const MyLearning = () => {
@@ -10,7 +10,7 @@ const MyLearning = () => {
 
    const fetchCourses = async () => {
      try {
-       const res = await fetch(`${baseUrl}/course/`, {
+       const res = await fetch(`${baseUrl}/user/my_courses/`, {
          headers: {
            Authorization: `Token ${await AsyncStorage.getItem("token")}`,
          },
@@ -50,28 +50,41 @@ const MyLearning = () => {
         <Text style={{ fontWeight: 700, fontSize: 20, color: "white" }}>
           My courses
         </Text>
-        {courses && courses.map((course, i) => (
-          <View key={i} style={{ flexDirection: "row", gap: 8 }}>
-            <Image
-              source={{ uri: course.image }}
-              height={60}
-              width={60}
-              style={{ borderRadius: 10 }}
-            />
-            <View style={{maxWidth:"80%"}}>
-              <Text style={{ color: "white", fontWeight: 600, fontSize: 14 }}>
-               {course.title}
-              </Text>
-              <Text style={{ color: "white", fontWeight: 300, fontSize: 11 }}>
-                John Purcell
-              </Text>
-              <View></View>
-              <Text style={{ color: "white", fontWeight: 200, fontSize: 14 }}>
-                34% complete
-              </Text>
+        {courses &&
+          courses.map((course, i) => {
+            console.log(`${course.image_url}`);
+          return  (
+            <View key={i} style={{ flexDirection: "row", gap: 8 }}>
+              <Image
+                source={{ uri: course.image_url }}
+                height={60}
+                width={60}
+                style={{ borderRadius: 10 }}
+              />
+              <View style={{ maxWidth: "80%", gap: 3 }}>
+                <Text style={{ color: "white", fontWeight: 600, fontSize: 16 }}>
+                  {course.title}
+                </Text>
+                <Text style={{ color: "white", fontWeight: 300, fontSize: 12 }}>
+                  John Purcell
+                </Text>
+                
+                {course?.progress == 0 ? (
+                  <Text
+                    style={{ color: PURPLE, fontWeight: 500, fontSize: 14 }}
+                  >
+                    Start Course
+                  </Text>
+                ) : (
+                  <Text
+                    style={{ color: "white", fontWeight: 200, fontSize: 14 }}
+                  >
+                    {course.progress}% complete
+                  </Text>
+                )}
+              </View>
             </View>
-          </View>
-        ))}
+          )})}
       </ScrollView>
     </SafeAreaView>
   );

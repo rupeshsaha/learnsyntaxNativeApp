@@ -20,6 +20,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { ActivityIndicator, View } from "react-native";
 import { baseUrl } from "./lib/constants";
 import ForgotPasswordScreen from "./screens/ForgotPasswordScreen";
+import CourseVideoScreen from "./screens/CourseVideoScreen";
 
 const Tabs = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -36,7 +37,11 @@ const TabNav = () => {
     <Tabs.Navigator
       initialRouteName="Featured"
       screenOptions={{
-        tabBarStyle: { backgroundColor: "black", height: 70,alignItems:"center" },
+        tabBarStyle: {
+          backgroundColor: "black",
+          height: 70,
+          alignItems: "center",
+        },
         headerShown: false,
       }}
     >
@@ -90,7 +95,7 @@ const TabNav = () => {
   );
 };
 
-const StackNav = ({ isLoggedIn }) => {
+const StackNav = () => {
   const [items, setItems] = useState([]);
 
   const value = useMemo(
@@ -110,50 +115,36 @@ const StackNav = ({ isLoggedIn }) => {
   return (
     <CartContext.Provider value={value}>
       <NavigationContainer>
-        <Stack.Navigator initialRouteName={isLoggedIn ? "main" : "login"}>
+        <Stack.Navigator initialRouteName={"main"} screenOptions={{headerShown: false}}>
           <Stack.Screen
             name="login"
             component={LoginScreen}
-            options={{
-              headerShown: false,
-            }}
+          
           />
           <Stack.Screen
             name="register"
             component={RegisterScreen}
-            options={{
-              headerShown: false,
-            }}
+            
           />
           <Stack.Screen
             name="forgotpassword"
             component={ForgotPasswordScreen}
-            options={{
-              headerShown: false,
-            }}
+           
           />
           <Stack.Screen
             name="main"
             component={TabNav}
-            options={{
-              header: ({ navigation, route, options, back }) => (
-                <CustomHeader
-                  navigation={navigation}
-                  route={route}
-                  options={options}
-                  back={back}
-                />
-              ),
-            }}
+           
           />
           <Stack.Screen
             name="Course details"
             component={CourseDetails}
-            options={{
-              header: ({ navigation, route }) => (
-                <CustomHeader navigation={navigation} route={route} />
-              ),
-            }}
+           
+          />
+          <Stack.Screen
+            name="course_video"
+            component={CourseVideoScreen}
+            
           />
           <Stack.Screen name="Cart" component={Cart} />
           <Stack.Screen name="Checkout" component={Checkout} />
@@ -175,7 +166,7 @@ const toastConfig = {
       }}
       text2Style={{
         fontSize: 15,
-        color:"green"
+        color: "green",
       }}
     />
   ),
@@ -190,65 +181,24 @@ const toastConfig = {
       }}
       text2Style={{
         fontSize: 15,
-        color:"red"
+        color: "red",
       }}
     />
   ),
 };
 
 export default function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [loading, setLoading] = useState(true);
+  
 
-  const getCurrentUser = async () => {
-    try {
-      const token = await AsyncStorage.getItem("token");
+ 
 
-      if (!token) {
-        console.log("No token found");
-        setIsLoggedIn(false);
-        return;
-      }
+  
 
-      const res = await fetch(`${baseUrl}/user/me`, {
-        headers: {
-          Authorization: `Token ${token}`,
-        },
-      });
-
-      if (!res.ok) {
-        console.log("Token invalid, clearing");
-        await AsyncStorage.removeItem("token");
-        setIsLoggedIn(false);
-        return;
-      }
-
-      const data = await res.json();
-
-      setIsLoggedIn(true);
-    } catch (err) {
-      console.log("Auth crash:", err.message);
-      setIsLoggedIn(false);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    getCurrentUser();
-  }, []);
-
-  if (loading) {
-    return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <ActivityIndicator size="large" />
-      </View>
-    );
-  }
+  
 
   return (
     <>
-      <StackNav isLoggedIn={isLoggedIn} />
+      <StackNav  />
       <Toast config={toastConfig} />
     </>
   );

@@ -1,15 +1,23 @@
-import { View, Text, Image, ScrollView, Pressable } from "react-native";
+import {
+  View,
+  Text,
+  Image,
+  ScrollView,
+  Pressable,
+  ActivityIndicator,
+} from "react-native";
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { AntDesign, FontAwesome5 } from "@expo/vector-icons";
-import { SECTIONS } from "../data";
-import { PURPLE } from "../lib/constants";
+import { baseUrl, PURPLE } from "../lib/constants";
 import Rating from "../components/Rating";
 import { CartContext } from "../App";
 import { useNavigation } from "@react-navigation/native";
+import Toast from "react-native-toast-message";
+import Cirriculum from "../components/Cirriculum";
 
 const CourseDetails = ({ route }) => {
-  const { data } = route.params;
+  const { id } = route.params;
   const navigation = useNavigation();
 
   const levelIcons = {
@@ -18,17 +26,35 @@ const CourseDetails = ({ route }) => {
     advanced: <FontAwesome5 name="tree" size={14} color="white" />,
   };
 
-  const [openSections, setOpenSections] = useState({});
   const [existsInCart, setExistsInCart] = useState(false);
+  const [course, setCourse] = useState();
 
-  useEffect(() => {
-    //  auto-open the first section
-    setOpenSections((prev) => ({ ...prev, [SECTIONS[0]?.id]: true }));
-  }, [SECTIONS]);
-
-  const toggleSection = (id) => {
-    setOpenSections((prev) => ({ ...prev, [id]: !prev[id] }));
+  const fetchCourseDetails = async () => {
+    try {
+      const res = await fetch(`${baseUrl}/course/${id}/`);
+      const data = await res.json();
+      if (!res.ok) {
+        return Toast.show({
+          type: "error",
+          text1: "Error",
+          text2:
+            data?.error ??
+            data?.detail ??
+            "Error while fetching course details",
+        });
+      }
+      setCourse(data);
+    } catch (error) {
+      console.log(error);
+    }
   };
+  useEffect(() => {
+    fetchCourseDetails();
+  }, []);
+
+
+
+ 
 
   const { addItem, items } = useContext(CartContext);
 
@@ -37,9 +63,23 @@ const CourseDetails = ({ route }) => {
   }, [items]);
 
   const alreadyExistsInCart = () => {
-    const exists = items.find((item) => item.id === data.id);
+    const exists = items.find((item) => item.id === course.id);
     if (exists) setExistsInCart(true);
   };
+
+  if (!course)
+    return (
+      <View
+        style={{
+          backgroundColor: "black",
+          height: "100%",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <ActivityIndicator size="large" color="#0000ff" />
+      </View>
+    );
 
   return (
     <SafeAreaView
@@ -47,55 +87,75 @@ const CourseDetails = ({ route }) => {
         backgroundColor: "black",
         height: "100%",
         paddingHorizontal: 10,
+        flex: 1,
       }}
     >
-      <ScrollView contentContainerStyle={{ gap: 10 }}>
+      <ScrollView contentContainerStyle={{ gap: 10, paddingBottom: 40 }}>
+        <View style={{width:"100%", justifyContent:"center", alignItems:"center"}}>
+
         <Image
           source={{
-            uri: data.image_url,
+            uri: course.image_url,
           }}
           height={240}
-          width={"100%"}
+          width={"95%"}
+          
           style={{ borderRadius: 10 }}
-        />
-        <Text style={{ color: "white", fontSize: 22 }}>{data.title}</Text>
-        <Text style={{ color: "white", fontSize: 16 }}>{data.description}</Text>
+          />
+          </View>
+        <Text style={{ color: "white", fontSize: 22 }}>{course.title}</Text>
+        <Text style={{ color: "white", fontSize: 16 }}>
+          {course.description}
+        </Text>
 
         {/* Ratings */}
-        <Rating ratingValue={data.rating} />
+        <Rating
+          ratingValue={course.average_rating}
+          reviewCount={course.review_count}
+        />
 
         {/* Features */}
 
         <View style={{ marginTop: 16, gap: 8 }}>
+          
+
           <View style={{ flexDirection: "row", gap: 6, alignItems: "center" }}>
-            <AntDesign name="info-circle" size={14} color="white" />
+            <AntDesign name="global" size={14} color="white" />
             <Text style={{ color: "white", fontSize: 14 }}>
-              Last updated {new Date(data.updated_at).toLocaleDateString()}
+              {course?.language}
             </Text>
           </View>
 
           <View style={{ flexDirection: "row", gap: 6, alignItems: "center" }}>
-            <AntDesign name="global" size={14} color="white" />
-            <Text style={{ color: "white", fontSize: 14 }}>English</Text>
-          </View>
+            {levelIcons[course?.author?.name] || null}
 
-          <View style={{ flexDirection: "row", gap: 6, alignItems: "center" }}>
-            {levelIcons[data?.level?.toLowerCase()] || null}
-
-            <Text style={{ color: "white", fontSize: 14 }}>{data.level}</Text>
+            <Text style={{ color: "white", fontSize: 14 }}>{course.level}</Text>
           </View>
         </View>
 
-        <Text
-          style={{
-            color: "white",
-            fontSize: 22,
-            fontWeight: 700,
-            marginVertical: 10,
-          }}
-        >
-          ₹{data.price}
-        </Text>
+        <View style={{ flexDirection: "row", gap: 10, alignItems: "center" }}>
+          <Text
+            style={{
+              color: "white",
+              fontSize: 22,
+              fontWeight: 700,
+              marginVertical: 10,
+            }}
+          >
+            ₹{course.discount_price}
+          </Text>
+          <Text
+            style={{
+              color: "#a2a2a2ff",
+              fontSize: 16,
+              fontWeight: 400,
+              marginVertical: 10,
+              textDecorationLine: "line-through",
+            }}
+          >
+            ₹{course.price}
+          </Text>
+        </View>
 
         <View style={{ gap: 12 }}>
           <View
@@ -114,7 +174,7 @@ const CourseDetails = ({ route }) => {
           <View style={{ gap: 6, flexDirection: "row", maxWidth: "100%" }}>
             {!existsInCart ? (
               <Pressable
-                onPress={() => addItem(data)}
+                onPress={() => addItem(course)}
                 style={{
                   borderWidth: 2,
                   borderColor: "white",
@@ -161,86 +221,7 @@ const CourseDetails = ({ route }) => {
           </View>
         </View>
 
-        <View style={{ marginVertical: 8, gap: 8 }}>
-          <Text style={{ color: "white", fontWeight: 700, fontSize: 18 }}>
-            What you'll learn
-          </Text>
-          <View style={{ gap: 4 }}>
-            {Array.from({ length: 5 }).map((_, i) => (
-              <View
-                key={i}
-                style={{ flexDirection: "row", gap: 6, alignItems: "center" }}
-              >
-                <AntDesign name="check" size={18} color="white" />
-                <Text style={{ color: "white" }}>
-                  Write efficient python programs from scratch, usin Git for
-                  version control
-                </Text>
-              </View>
-            ))}
-          </View>
-        </View>
-
-        <View style={{ gap: 10 }}>
-          <Text style={{ color: "white", fontWeight: 700, fontSize: 18 }}>
-            Cirriculum
-          </Text>
-          <View>
-            <Text style={{ color: "white", fontSize: 12 }}>
-              32 sections • 251 lectures • 32h 5m total length
-            </Text>
-          </View>
-          <View style={{ gap: 28 }}>
-            {SECTIONS.map((section) => (
-              <View key={section.id}>
-                <View
-                  style={{
-                    flexDirection: "row",
-                    justifyContent: "space-between",
-                  }}
-                >
-                  <Text style={{ color: "white", fontSize: 20 }}>
-                    Section {section.id} - {section.title}
-                  </Text>
-                  <Pressable onPress={() => toggleSection(section.id)}>
-                    {openSections[section.id] ? (
-                      <AntDesign name="minus" size={20} color="white" />
-                    ) : (
-                      <AntDesign name="plus" size={20} color="white" />
-                    )}
-                  </Pressable>
-                </View>
-                {openSections[section.id] &&
-                  section.lessons.map((lesson, idx) => (
-                    <View
-                      key={idx}
-                      style={{ flexDirection: "row", padding: 8 }}
-                    >
-                      <Text
-                        style={{
-                          color: "white",
-                          fontSize: 14,
-                          paddingHorizontal: 20,
-                        }}
-                      >
-                        {lesson.id}
-                      </Text>
-                      <Text
-                        key={idx}
-                        style={{
-                          color: "white",
-                          fontSize: 14,
-                          fontWeight: 600,
-                        }}
-                      >
-                        {lesson.title}
-                      </Text>
-                    </View>
-                  ))}
-              </View>
-            ))}
-          </View>
-        </View>
+        <Cirriculum modules={course?.modules}/>
       </ScrollView>
     </SafeAreaView>
   );

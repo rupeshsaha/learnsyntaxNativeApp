@@ -1,10 +1,10 @@
 import { View, Text, ScrollView, Image } from "react-native";
 import React, { useEffect, useState } from "react";
-import { SafeAreaView } from "react-native-safe-area-context";
-import CourseCard from "../../components/CourseCard";
+
 import CourseList from "../../components/CourseList";
 import { baseUrl } from "../../lib/constants";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const Featured = () => {
 
@@ -31,7 +31,7 @@ const Featured = () => {
     fetchCategories();
   },[])
   return (
-    <View
+    <SafeAreaView
       style={{
         backgroundColor: "black",
         height: "100%",
@@ -51,7 +51,7 @@ const Featured = () => {
         ))}
 
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 };
 

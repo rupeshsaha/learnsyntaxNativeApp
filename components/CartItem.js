@@ -1,10 +1,13 @@
-import { View, Text, Image } from "react-native";
+import { View, Text, Image, Pressable } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import Rating from "./Rating";
 import { PURPLE } from "../lib/constants";
+import { useContext } from "react";
+import { CartContext } from "../App";
 
-const CartItem = ({ data, isCheckoutPage = false }) => {
+const CartItem = ({ data,  }) => {
   const navigation = useNavigation();
+  const { items, removeItem } = useContext(CartContext);
   return (
     <View style={{ width: "100%", gap: 10, alignItems: "center" }}>
       <View
@@ -12,20 +15,11 @@ const CartItem = ({ data, isCheckoutPage = false }) => {
       ></View>
 
       <View style={{ width: "95%", flexDirection: "row", gap: 6 }}>
-        <Image source={{ uri: data.image }} height={50} width={50} />
+        <Image source={{ uri: data.image_url }} height={50} width={50} />
 
-        {isCheckoutPage && (
-          <View style={{ gap: 8 }}>
-            <Text
-              onPress={() => navigation.navigate("Course details", { data })}
-              style={{ fontWeight: "bold", fontSize: 16, color: "white" }}
-            >
-              {data.title}
-            </Text>
-          </View>
-        )}
+        
 
-        {!isCheckoutPage && (
+        { (
           <View style={{ gap: 8, maxWidth: "70%" }}>
             <Text
               onPress={() => navigation.navigate("Course details", { data })}
@@ -33,16 +27,22 @@ const CartItem = ({ data, isCheckoutPage = false }) => {
             >
               {data.title}
             </Text>
-            <Rating ratingValue={4.6} />
+            <Rating
+              ratingValue={data.average_rating}
+              reviewCount={data.review_count}
+            />
+
             <Text style={{ fontSize: 12, color: "white" }}>
               55 total hours • 500 lectures • Beginner Level
             </Text>
             <View style={{ flexDirection: "row", gap: 10 }}>
-              <Text
-                style={{ color: PURPLE, fontWeight: "light", fontSize: 12 }}
-              >
-                Remove
-              </Text>
+              <Pressable onPress={() => removeItem(data.id)}>
+                <Text
+                  style={{ color: PURPLE, fontWeight: "light", fontSize: 12 }}
+                >
+                  Remove
+                </Text>
+              </Pressable>
               <Text
                 style={{ color: PURPLE, fontWeight: "light", fontSize: 12 }}
               >
@@ -57,12 +57,22 @@ const CartItem = ({ data, isCheckoutPage = false }) => {
           </View>
         )}
 
-        <View style={{ marginLeft: `${isCheckoutPage ? "auto" : ""}` }}>
+        <View>
           <Text
             style={{
-              color: `${isCheckoutPage ? "white" : PURPLE}`,
+              color: `${"white"}`,
               fontSize: 22,
               fontWeight: 600,
+            }}
+          >
+            ₹{data.discount_price}
+          </Text>
+          <Text
+            style={{
+              color: `${ "rgba(173, 173, 173, 1)" }`,
+              fontSize: 16,
+              fontWeight: 400,
+              textDecorationLine: "line-through",
             }}
           >
             ₹{data.price}

@@ -5,11 +5,12 @@ import { useNavigation } from "@react-navigation/native";
 import Rating from "./Rating";
 
 const CourseCard = ({ course }) => {
+  
   const navigation = useNavigation()
   return (
     <View style={{ gap: 6 }}>
       <Pressable
-        onPress={() => navigation.navigate("Course details", { data: course })}
+        onPress={() => navigation.navigate("Course details", { id: course.id })}
       >
         <Image
           source={{ uri: course.image_url }}
@@ -24,8 +25,8 @@ const CourseCard = ({ course }) => {
       >
         {course.title}
       </Text>
-      <Text style={{ color: "white", fontSize: 12 }}>{course.level}</Text>
-        <Rating ratingValue={4.5}/>
+      <Text style={{ color: "white", fontSize: 12 }}>{course?.author?.name}</Text>
+        <Rating ratingValue={course.average_rating} reviewCount={course.review_count}/>
       <View style={{flexDirection:"row", gap:8, alignItems:"center"}}>
         
       <Text style={{ fontWeight: 700, fontSize: 16, color: "white" }}>

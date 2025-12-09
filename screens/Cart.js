@@ -1,7 +1,7 @@
-import { View, Text, Image, ScrollView, Pressable } from "react-native";
+import { View, Text, Image, ScrollView, Pressable, Linking } from "react-native";
 import React, { useContext, useEffect, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { PURPLE } from "../lib/constants";
+import { baseUrl, PURPLE } from "../lib/constants";
 import { courses } from "../data";
 import { Feather } from "@expo/vector-icons";
 
@@ -9,20 +9,44 @@ import Rating from "../components/Rating";
 import { CartContext } from "../App";
 import { useNavigation } from "@react-navigation/native";
 import CartItem from "../components/CartItem";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import Toast from "react-native-toast-message";
 
 const Cart = () => {
   const [isCartEmpty, setIsCartEmpty] = useState(false);
 
-  const navigation = useNavigation()
-
+  
   useEffect(() => {
     if (items.length === 0) setIsCartEmpty(true);
   }, [items]);
-
+  
   const { items, removeItem } = useContext(CartContext);
   const total = items.reduce((sum, item) => {
     return Number(sum) + Number(item.price);
   }, 0);
+
+    const handleCheckout = async() => {
+      try {
+        const res = await fetch(`${baseUrl}/payments/buy/`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization" :`Token ${await AsyncStorage.getItem("token")}`
+          },
+          body : JSON.stringify({course_id:items[0]?.id })
+        })
+        const data = await res.json();
+        if (!res.ok) {
+          return Toast.show({type:"error",text1: "ERROR", text2: data.error ?? "Error while buying course"})
+        }
+  
+        Linking.openURL(`${baseUrl}/payment/webview/?order_id=${data?.gateway_order_id}&amount=${total}&course_id=${items[0]?.id}`)
+  
+  
+      } catch (error) {
+        console.log(error)
+      }
+    }
 
   return (
     <SafeAreaView
@@ -127,7 +151,7 @@ const Cart = () => {
 
       {!isCartEmpty && (
         <Pressable
-          onPress={() => navigation.navigate("Checkout")}
+          onPress={() => handleCheckout()}
           style={{
             backgroundColor: PURPLE,
             alignItems: "center",

@@ -1,10 +1,13 @@
-import { View, Text, TextInput, Image, Pressable, ScrollView } from "react-native";
+import { View, Text, TextInput, Image, Pressable, ScrollView, TouchableHighlight, Linking } from "react-native";
 import React, { useContext, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Fontisto, AntDesign, FontAwesome } from "@expo/vector-icons";
 import CartItem from "../components/CartItem";
+import RazorpayCheckout from "react-native-razorpay";
 import { CartContext } from "../App";
-import { PURPLE } from "../lib/constants";
+import { baseUrl, PURPLE } from "../lib/constants";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import Toast from "react-native-toast-message";
 
 const Checkout = () => {
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("cards");
@@ -18,6 +21,9 @@ const Checkout = () => {
   const total = items.reduce((sum, item) => {
     return Number(sum) + Number(item.price);
   }, 0);
+
+
+
 
   return (
     <SafeAreaView
@@ -239,8 +245,9 @@ const Checkout = () => {
             ₹{total}
           </Text>
         </View>
+        
         <Pressable
-          onPress={() => navigation.navigate("Checkout")}
+         onPress={()=>{handleCheckout()}}
           style={{
             backgroundColor: PURPLE,
             alignItems: "center",
@@ -253,13 +260,18 @@ const Checkout = () => {
             gap: 4,
             borderRadius: 6,
           }}
-        >
+          >
           <FontAwesome name="lock" color="white" size={22} />
           <Text style={{ color: "white", fontSize: 20, fontWeight: "bold" }}>
             Pay Now
           </Text>
         </Pressable>
+          
       </View>
+
+
+
+     
     </SafeAreaView>
   );
 };
