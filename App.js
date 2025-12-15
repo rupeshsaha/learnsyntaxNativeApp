@@ -4,23 +4,18 @@ import { NavigationContainer } from "@react-navigation/native";
 import { Feather, Entypo, AntDesign, FontAwesome5 } from "@expo/vector-icons";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import LoginScreen from "./screens/LoginScreen";
-import Search from "./screens/_tabs/Search";
 import Featured from "./screens/_tabs/Featured";
 import MyLearning from "./screens/_tabs/MyLearning";
-import Wishlist from "./screens/_tabs/Wishlist";
 import Account from "./screens/_tabs/Account";
 import CourseDetails from "./screens/CourseDetails";
-import CustomHeader from "./components/Header";
-import Cart from "./screens/Cart";
-import { createContext, useEffect, useMemo, useState } from "react";
+import { createContext,  useMemo, useState } from "react";
 import Checkout from "./screens/Checkout";
 import RegisterScreen from "./screens/RegisterScreen";
 import Toast, { BaseToast, ErrorToast } from "react-native-toast-message";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { ActivityIndicator, View } from "react-native";
-import { baseUrl } from "./lib/constants";
+
 import ForgotPasswordScreen from "./screens/ForgotPasswordScreen";
 import CourseVideoScreen from "./screens/CourseVideoScreen";
+import LearningScreen from "./screens/LearningScreen";
 
 const Tabs = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -54,15 +49,7 @@ const TabNav = () => {
           ),
         }}
       />
-      <Tabs.Screen
-        name="Search"
-        component={Search}
-        options={{
-          tabBarIcon: (focused) => (
-            <Entypo name="magnifying-glass" size={28} color="white" />
-          ),
-        }}
-      />
+    
       <Tabs.Screen
         name="My Learning"
         component={MyLearning}
@@ -73,15 +60,6 @@ const TabNav = () => {
         }}
       />
 
-      <Tabs.Screen
-        name="Wishlist"
-        component={Wishlist}
-        options={{
-          tabBarIcon: (focused) => (
-            <Feather name="heart" size={28} color="white" />
-          ),
-        }}
-      />
       <Tabs.Screen
         name="Account"
         component={Account}
@@ -115,39 +93,21 @@ const StackNav = () => {
   return (
     <CartContext.Provider value={value}>
       <NavigationContainer>
-        <Stack.Navigator initialRouteName={"main"} screenOptions={{headerShown: false}}>
-          <Stack.Screen
-            name="login"
-            component={LoginScreen}
-          
-          />
-          <Stack.Screen
-            name="register"
-            component={RegisterScreen}
-            
-          />
+        <Stack.Navigator
+          initialRouteName={"main"}
+          screenOptions={{ headerShown: false }}
+        >
+          <Stack.Screen name="login" component={LoginScreen} />
+          <Stack.Screen name="register" component={RegisterScreen} />
           <Stack.Screen
             name="forgotpassword"
             component={ForgotPasswordScreen}
-           
           />
-          <Stack.Screen
-            name="main"
-            component={TabNav}
-           
-          />
-          <Stack.Screen
-            name="Course details"
-            component={CourseDetails}
-           
-          />
-          <Stack.Screen
-            name="course_video"
-            component={CourseVideoScreen}
-            
-          />
-          <Stack.Screen name="Cart" component={Cart} />
-          <Stack.Screen name="Checkout" component={Checkout} />
+          <Stack.Screen name="main" component={TabNav} />
+          <Stack.Screen name="Course details" component={CourseDetails} />
+          <Stack.Screen name="course_video" component={CourseVideoScreen} />
+          <Stack.Screen name="checkout" component={Checkout} />
+          <Stack.Screen name="learning" component={LearningScreen}/>
         </Stack.Navigator>
       </NavigationContainer>
     </CartContext.Provider>
@@ -188,17 +148,9 @@ const toastConfig = {
 };
 
 export default function App() {
-  
-
- 
-
-  
-
-  
-
   return (
     <>
-      <StackNav  />
+      <StackNav />
       <Toast config={toastConfig} />
     </>
   );

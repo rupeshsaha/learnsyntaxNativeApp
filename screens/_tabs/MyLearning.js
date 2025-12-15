@@ -1,12 +1,14 @@
-import { View, Text, ScrollView, Image } from "react-native";
+import { View, Text, ScrollView, Image, Pressable } from "react-native";
 import React, { useEffect, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Entypo, Feather } from "@expo/vector-icons";
 import { baseUrl, PURPLE } from "../../lib/constants";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useNavigation } from "@react-navigation/native";
 
 const MyLearning = () => {
-   const [courses, setCourses] = useState("");
+  const [courses, setCourses] = useState("");
+  const navigation = useNavigation()
 
    const fetchCourses = async () => {
      try {
@@ -50,11 +52,12 @@ const MyLearning = () => {
         <Text style={{ fontWeight: 700, fontSize: 20, color: "white" }}>
           My courses
         </Text>
-        {courses &&
-          courses.map((course, i) => {
-            console.log(`${course.image_url}`);
+        {courses?.length>0 ?
+          (courses.map((course, i) => {
           return  (
-            <View key={i} style={{ flexDirection: "row", gap: 8 }}>
+            <Pressable
+            onPress={()=>navigation.navigate("learning",{id:course?.id})}
+              key={i} style={{ flexDirection: "row", gap: 8 }}>
               <Image
                 source={{ uri: course.image_url }}
                 height={60}
@@ -83,8 +86,11 @@ const MyLearning = () => {
                   </Text>
                 )}
               </View>
-            </View>
-          )})}
+            </Pressable>
+            )
+          })):(<View style={{justifyContent:"center", alignItems:"center", height:"100%"}}><Text style={{color: "white", fontSize: 16}}>You have not enrolled in any course</Text></View>)
+        
+        }
       </ScrollView>
     </SafeAreaView>
   );

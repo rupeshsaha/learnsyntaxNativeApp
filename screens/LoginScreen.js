@@ -1,21 +1,30 @@
-import { View, Text, TextInput, Pressable } from "react-native";
+import {
+  View,
+  Text,
+  TextInput,
+  Pressable,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
+} from "react-native";
 import React, { useState } from "react";
-import { Feather, AntDesign } from "@expo/vector-icons";
+import { Feather, AntDesign, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { baseUrl, PURPLE } from "../lib/constants";
 import Toast from "react-native-toast-message";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const LoginScreen = ({ route }) => {
-const data = route?.params?.data;
+  const data = route?.params?.data;
   const navigation = useNavigation();
 
-  const [username, setUsername] = useState(data?.username ?? "");
+  const [email, setEmail] = useState(data?.email ?? "");
   const [password, setPassword] = useState(data?.password ?? "");
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleLogin = async () => {
     try {
-      if (!username?.trim() || !password?.trim()) {
+      if (!email?.trim() || !password?.trim()) {
         return Toast.show({
           type: "error",
           text1: "Error",
@@ -28,20 +37,17 @@ const data = route?.params?.data;
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          email:username,
+          email,
           password,
         }),
       });
       const data = await res.json();
-      
 
       if (!res.ok) {
         return Toast.show({
           type: "error",
           text1: "Error",
-          text2: `${
-            data.error
-          }`,
+          text2: `${data.error}`,
         });
       }
 
@@ -55,131 +61,308 @@ const data = route?.params?.data;
       navigation.navigate("main");
     } catch (error) {
       console.log(error);
-
       alert("Error while login", error);
     }
   };
 
   return (
-    <View
-      style={{
-        justifyContent: "center",
-        alignItems: "center",
-        backgroundColor: "black",
-        minHeight: "100%",
-        gap: 15,
-      }}
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      style={{ flex: 1 }}
     >
-      <View
-        style={{
-          justifyContent: "center",
-          alignItems: "center",
-          gap: 25,
+      <ScrollView
+        contentContainerStyle={{
+          flexGrow: 1,
+          backgroundColor: "#000000",
         }}
+        showsVerticalScrollIndicator={false}
       >
-        <Text
+        <View
           style={{
-            fontWeight: 700,
-            fontSize: 20,
-            color: "white",
-            textAlign: "center",
-            marginBottom: 20,
+            flex: 1,
+            paddingHorizontal: 24,
+            paddingTop: 80,
+            paddingBottom: 40,
+            justifyContent: "center",
           }}
         >
-          Log in to continue your learning journey
-        </Text>
-      </View>
-      <TextInput
-        style={{
-          height: 40,
-          minWidth: "90%",
-          borderBottomWidth: 2,
-          borderBottomColor: "white",
-          color: "white",
-        }}
-        placeholderTextColor={"white"}
-        placeholder="Username"
-        value={username}
-        onChangeText={setUsername}
-      />
-      <TextInput
-        style={{
-          height: 40,
-          minWidth: "90%",
-          borderBottomWidth: 2,
-          borderBottomColor: "white",
-          color: "white",
-        }}
-        secureTextEntry
-        placeholderTextColor={"white"}
-        placeholder="Password"
-        value={password}
-        onChangeText={setPassword}
-      />
+          {/* Header */}
+          <View style={{ marginBottom: 48 }}>
+            <View
+              style={{
+                width: 64,
+                height: 64,
+                borderRadius: 20,
+                backgroundColor: PURPLE,
+                justifyContent: "center",
+                alignItems: "center",
+                marginBottom: 24,
+              }}
+            >
+              <MaterialCommunityIcons name="login" size={32} color="white" />
+            </View>
+            <Text
+              style={{
+                fontSize: 32,
+                fontWeight: "800",
+                color: "white",
+                marginBottom: 8,
+              }}
+            >
+              Welcome Back
+            </Text>
+            <Text
+              style={{
+                fontSize: 16,
+                color: "rgba(255, 255, 255, 0.6)",
+                fontWeight: "400",
+              }}
+            >
+              Log in to continue your learning journey
+            </Text>
+          </View>
 
-      <Pressable
-        onPress={()=> navigation.navigate("forgotpassword")}
-        style={{  width: "95%", alignItems: "flex-end" }}
-      >
-        <Text style={{ color: PURPLE, fontWeight: "bold", fontSize: 14 }}>
-          Forgot Password ?
-        </Text>
-      </Pressable>
+          {/* Form */}
+          <View style={{ gap: 16, marginBottom: 24 }}>
+            <View
+              style={{
+                backgroundColor: "rgba(255, 255, 255, 0.05)",
+                borderRadius: 16,
+                borderWidth: 2,
+                borderColor: "rgba(255, 255, 255, 0.1)",
+                flexDirection: "row",
+                alignItems: "center",
+                paddingHorizontal: 16,
+                height: 56,
+              }}
+            >
+              <Feather
+                name="mail"
+                size={20}
+                color="rgba(255, 255, 255, 0.5)"
+                style={{ marginRight: 12 }}
+              />
+              <TextInput
+                style={{
+                  flex: 1,
+                  color: "white",
+                  fontSize: 16,
+                  fontWeight: "500",
+                }}
+                placeholderTextColor="rgba(255, 255, 255, 0.4)"
+                placeholder="Email address"
+                value={email}
+                onChangeText={setEmail}
+                keyboardType="email-address"
+                autoCapitalize="none"
+              />
+            </View>
 
-      <Pressable
-        onPress={() => handleLogin()}
-        style={{
-          backgroundColor: PURPLE,
-          width: "90%",
-          height: 50,
-          justifyContent: "center",
-          alignItems: "center",
-          flexDirection: "row",
-          gap: 8,
-        }}
-      >
-        <Text style={{ color: "white", fontSize: 18, fontWeight: 700 }}>
-          Log in
-        </Text>
-      </Pressable>
-      <View
-        style={{
-          flexDirection: "row",
-          minWidth: "90%",
-          alignItems: "center",
-          gap: 10,
-        }}
-      >
-        <View
-          style={{ height: 1, width: "30%", backgroundColor: "white" }}
-        ></View>
-        <Text style={{ color: "white", fontSize: 14 }}>
-          Other login options
-        </Text>
-        <View
-          style={{ height: 1, width: "30%", backgroundColor: "white" }}
-        ></View>
-      </View>
-      <View style={{ flexDirection: "row", gap: 10 }}>
-        <View style={{ borderWidth: 2, borderColor: "white", padding: 8 }}>
-          <AntDesign name="google" size={20} color="white" />
+            <View
+              style={{
+                backgroundColor: "rgba(255, 255, 255, 0.05)",
+                borderRadius: 16,
+                borderWidth: 2,
+                borderColor: "rgba(255, 255, 255, 0.1)",
+                flexDirection: "row",
+                alignItems: "center",
+                paddingHorizontal: 16,
+                height: 56,
+              }}
+            >
+              <Feather
+                name="lock"
+                size={20}
+                color="rgba(255, 255, 255, 0.5)"
+                style={{ marginRight: 12 }}
+              />
+              <TextInput
+                style={{
+                  flex: 1,
+                  color: "white",
+                  fontSize: 16,
+                  fontWeight: "500",
+                }}
+                placeholderTextColor="rgba(255, 255, 255, 0.4)"
+                placeholder="Password"
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry={!showPassword}
+              />
+              <Pressable onPress={() => setShowPassword(!showPassword)}>
+                <Feather
+                  name={showPassword ? "eye" : "eye-off"}
+                  size={20}
+                  color="rgba(255, 255, 255, 0.5)"
+                />
+              </Pressable>
+            </View>
+          </View>
+
+          {/* Forgot Password */}
+          <Pressable
+            onPress={() => navigation.navigate("forgotpassword")}
+            style={{ alignSelf: "flex-end", marginBottom: 32 }}
+          >
+            <Text
+              style={{
+                color: PURPLE,
+                fontSize: 15,
+                fontWeight: "600",
+              }}
+            >
+              Forgot Password?
+            </Text>
+          </Pressable>
+
+          {/* Login Button */}
+          <Pressable
+            onPress={handleLogin}
+            style={{
+              backgroundColor: PURPLE,
+              height: 56,
+              borderRadius: 16,
+              justifyContent: "center",
+              alignItems: "center",
+              marginBottom: 32,
+              shadowColor: PURPLE,
+              shadowOffset: { width: 0, height: 8 },
+              shadowOpacity: 0.4,
+              shadowRadius: 16,
+              elevation: 8,
+            }}
+          >
+            <Text
+              style={{
+                color: "white",
+                fontSize: 17,
+                fontWeight: "700",
+                letterSpacing: 0.5,
+              }}
+            >
+              Log In
+            </Text>
+          </Pressable>
+
+          {/* Divider */}
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              marginBottom: 32,
+              gap: 16,
+            }}
+          >
+            <View
+              style={{
+                flex: 1,
+                height: 1,
+                backgroundColor: "rgba(255, 255, 255, 0.1)",
+              }}
+            />
+            <Text
+              style={{
+                color: "rgba(255, 255, 255, 0.4)",
+                fontSize: 14,
+                fontWeight: "500",
+              }}
+            >
+              Or continue with
+            </Text>
+            <View
+              style={{
+                flex: 1,
+                height: 1,
+                backgroundColor: "rgba(255, 255, 255, 0.1)",
+              }}
+            />
+          </View>
+
+          {/* Social Login */}
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "center",
+              gap: 16,
+              marginBottom: 32,
+            }}
+          >
+            <Pressable
+              style={{
+                width: 64,
+                height: 64,
+                borderRadius: 16,
+                backgroundColor: "rgba(255, 255, 255, 0.05)",
+                borderWidth: 1,
+                borderColor: "rgba(255, 255, 255, 0.1)",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <AntDesign name="google" size={24} color="white" />
+            </Pressable>
+            <Pressable
+              style={{
+                width: 64,
+                height: 64,
+                borderRadius: 16,
+                backgroundColor: "rgba(255, 255, 255, 0.05)",
+                borderWidth: 1,
+                borderColor: "rgba(255, 255, 255, 0.1)",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <Feather name="facebook" size={24} color="white" />
+            </Pressable>
+            <Pressable
+              style={{
+                width: 64,
+                height: 64,
+                borderRadius: 16,
+                backgroundColor: "rgba(255, 255, 255, 0.05)",
+                borderWidth: 1,
+                borderColor: "rgba(255, 255, 255, 0.1)",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <AntDesign name="apple1" size={24} color="white" />
+            </Pressable>
+          </View>
+
+          {/* Footer */}
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <Text
+              style={{
+                color: "rgba(255, 255, 255, 0.6)",
+                fontSize: 15,
+                fontWeight: "400",
+              }}
+            >
+              Don't have an account?{" "}
+            </Text>
+            <Pressable onPress={() => navigation.navigate("register")}>
+              <Text
+                style={{
+                  color: PURPLE,
+                  fontSize: 15,
+                  fontWeight: "700",
+                }}
+              >
+                Sign Up
+              </Text>
+            </Pressable>
+          </View>
         </View>
-        <View style={{ borderWidth: 2, borderColor: "white", padding: 8 }}>
-          <Feather name="facebook" size={20} color="white" />
-        </View>
-        <View style={{ borderWidth: 2, borderColor: "white", padding: 8 }}>
-          <AntDesign name="apple" size={20} color="white" />
-        </View>
-      </View>
-      <View style={{ flexDirection: "row" }}>
-        <Text style={{ color: "white" }}>Don't have an account ? </Text>
-        <Pressable onPress={() => navigation.navigate("register")}>
-          <Text style={{ color: PURPLE, fontWeight: "bold" }}>
-            Create Account
-          </Text>
-        </Pressable>
-      </View>
-    </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 };
 
