@@ -25,7 +25,6 @@ const Featured = () => {
        const res = await fetch(`${baseUrl}/course/?search=${searchQuery}`)
        const data = await res.json();
        setCourses(data)
-       console.log(data)
        setFilteredCourses(data)
      } catch (error) {
       console.log(error)

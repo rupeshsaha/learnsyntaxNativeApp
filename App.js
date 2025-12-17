@@ -14,8 +14,9 @@ import RegisterScreen from "./screens/RegisterScreen";
 import Toast, { BaseToast, ErrorToast } from "react-native-toast-message";
 
 import ForgotPasswordScreen from "./screens/ForgotPasswordScreen";
-import CourseVideoScreen from "./screens/CourseVideoScreen";
 import LearningScreen from "./screens/LearningScreen";
+import QuizContent from "./screens/content/QuizContent";
+import TextContent from "./screens/content/TextContent";
 
 const Tabs = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -105,9 +106,11 @@ const StackNav = () => {
           />
           <Stack.Screen name="main" component={TabNav} />
           <Stack.Screen name="Course details" component={CourseDetails} />
-          <Stack.Screen name="course_video" component={CourseVideoScreen} />
           <Stack.Screen name="checkout" component={Checkout} />
-          <Stack.Screen name="learning" component={LearningScreen}/>
+          <Stack.Screen name="learning" component={LearningScreen} />
+          <Stack.Screen name="quiz_content" component={QuizContent} />
+          <Stack.Screen name="text_content" component={TextContent} />
+          
         </Stack.Navigator>
       </NavigationContainer>
     </CartContext.Provider>

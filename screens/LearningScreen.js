@@ -3,19 +3,54 @@ import React, { useEffect, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { baseUrl, PURPLE } from "../lib/constants";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Feather } from "@expo/vector-icons";
+import { Feather, FontAwesome5 } from "@expo/vector-icons";
 import { useVideoPlayer, VideoView } from "expo-video";
 import Toast from "react-native-toast-message";
+import { useNavigation } from "@react-navigation/native";
 
+const markAsComplete = async (topicId) => {
+  try {
+    const res = await fetch(`${baseUrl}/content/${topicId}/complete/`, {
+      method: "POST",
+      headers: {
+        Authorization: `Token ${await AsyncStorage.getItem("token")}`,
+      },
+    });
+
+    if (res.ok) {
+      Toast.show({
+        type: "success",
+        text1: "Completed",
+        text2: "Topic completed successfully",
+      });
+    }
+  } catch (error) {
+    console.log(error);
+  }
+};
 
 const Content = ({ topic }) => {
   const isVideo = topic.type === "video";
+  const [progressPercentage, setProgressPercentage] = useState(0);
+  const navigation = useNavigation();
 
   const player = useVideoPlayer(isVideo ? topic.video_url : null, (player) => {
     if (!player) return;
     player.loop = true;
     player.play();
   });
+
+  useEffect(() => {
+    if (!player || !isVideo || !topic) return;
+    const interval = setInterval(() => {
+      setProgressPercentage((player?.currentTime / player?.duration) * 100);
+
+      if (progressPercentage > 90) {
+        markAsComplete(topic?.id);
+      }
+    }, 5 * 1000);
+    return () => clearInterval(interval);
+  }, [player]);
 
   if (isVideo && player) {
     return (
@@ -38,14 +73,19 @@ const Content = ({ topic }) => {
       }}
     >
       <Pressable
-        onPress={() => {}}
+        onPress={() => {
+          navigation.navigate(
+            `${topic.type === "quiz" ? "quiz_content" : "text_content"}`,
+            { id: topic?.id }
+          );
+        }}
         style={({ pressed }) => [
           {
             backgroundColor: PURPLE,
             paddingHorizontal: 28,
             paddingVertical: 14,
             borderRadius: 12,
-            elevation: pressed ? 2 : 6,
+
             transform: [{ scale: pressed ? 0.95 : 1 }],
           },
         ]}
@@ -65,12 +105,11 @@ const Content = ({ topic }) => {
   );
 };
 
-
 const LearningScreen = ({ route }) => {
   const { id } = route.params;
   const [learning, setLearning] = useState("");
   const [course, setCourse] = useState("");
-  const [currentTopic, setCurrentTopic] = useState("1");
+  const [currentTopic, setCurrentTopic] = useState();
 
   const fetchLearning = async () => {
     try {
@@ -82,18 +121,22 @@ const LearningScreen = ({ route }) => {
         },
       });
       const data = await res.json();
-      console.log(JSON.stringify(data, 2, null));
       setLearning(data);
+      console.log(data);
     } catch (error) {
       console.log(error);
     }
   };
 
-  const handleSelectTopic = (topic,module) => {
-    if (module.is_unlocked) setCurrentTopic(topic)
-    else Toast.show({type:"error",text1:"Access denied", text2:module.unlock_message})
-  }
-
+  const handleSelectTopic = (topic, module) => {
+    if (module.is_unlocked) setCurrentTopic(topic);
+    else
+      Toast.show({
+        type: "error",
+        text1: "Access denied",
+        text2: module.unlock_message,
+      });
+  };
 
   const fetchCourseDetails = async () => {
     try {
@@ -119,7 +162,6 @@ const LearningScreen = ({ route }) => {
     fetchLearning();
     fetchCourseDetails();
   }, [id]);
-
 
   const topicBadge = (topic) => {
     const isCompleted = topic.is_completed;
@@ -167,14 +209,22 @@ const LearningScreen = ({ route }) => {
             <Text style={textStyle}>Reading</Text>
           </View>
         );
+      case "quiz":
+        return (
+          <View style={badgeStyle}>
+            <FontAwesome5
+              name="brain"
+              size={14}
+              color={isCompleted ? "#666" : "#bb86fc"}
+            />
+            <Text style={textStyle}>Quiz</Text>
+          </View>
+        );
 
       default:
         return null;
     }
   };
-
-
-  
 
   if (!course || !learning)
     return (
@@ -191,256 +241,328 @@ const LearningScreen = ({ route }) => {
     );
 
   return (
-    <SafeAreaView style={{ backgroundColor: "#0a0a0a", flex: 1 }}>
-      <ScrollView style={{ flex: 1 }}>
-        {/* Content Display Section */}
-        {currentTopic && <View style={{ position: "relative", height: 260, marginBottom: 20 }}>
-          <Content topic={currentTopic}/>
-        </View>}
+    <SafeAreaView style={{ backgroundColor: "#0a0a0a", height: "100%" }}>
+      {/* Content Display Section */}
+      <View
+        style={{
+          position: "relative",
+          height: 260,
+          marginBottom: 20,
+          backgroundColor: "#1a1a1aff",
+        }}
+      >
+        {currentTopic ? (
+          <Content topic={currentTopic} />
+        ) : (
+          <Image
+            source={{ uri: course?.image_url }}
+            height={260}
+            width={"100%"}
+          />
+        )}
+      </View>
 
-        <View style={{ paddingHorizontal: 20, paddingBottom: 30 }}>
-          {/* Course Header */}
-          <View style={{ marginBottom: 30 }}>
-            <Text
+      <View style={{ paddingHorizontal: 20 }}>
+        {currentTopic && learning && !currentTopic.is_completed ? (
+          <View
+            style={{
+              justifyContent: "flex-end",
+              flexDirection: "row",
+              width: "100%",
+            }}
+          >
+            <Pressable
+              onPress={() => {
+                markAsComplete(currentTopic.id);
+                fetchLearning();
+              }}
               style={{
-                color: "#ffffff",
-                fontSize: 28,
-                fontWeight: "700",
-                marginBottom: 8,
-                lineHeight: 34,
+                backgroundColor: PURPLE,
+                paddingHorizontal: 18,
+                paddingVertical: 10,
+                borderRadius: 8,
               }}
             >
-              {course.title}
-            </Text>
+              <Text style={{ color: "white", fontWeight: 700 }}>
+                Mark as complete
+              </Text>
+            </Pressable>
+          </View>
+        ) : (
+          learning.progress == 100 && (
             <View
               style={{
+                justifyContent: "flex-end",
                 flexDirection: "row",
-                alignItems: "center",
-                gap: 8,
-                marginTop: 4,
+                width: "100%",
               }}
             >
-              <View
+              <Pressable
+                onPress={() => {
+                  markAsComplete(currentTopic.id);
+                  fetchLearning();
+                }}
                 style={{
-                  width: 32,
-                  height: 32,
-                  borderRadius: 16,
-                  backgroundColor: "#bb86fc",
-                  justifyContent: "center",
-                  alignItems: "center",
+                  backgroundColor: "#198900ff",
+                  paddingHorizontal: 18,
+                  paddingVertical: 10,
+                  borderRadius: 8,
                 }}
               >
-                <Text style={{ color: "#0a0a0a", fontWeight: "700" }}>
-                  {course?.author?.name?.charAt(0).toUpperCase() ?? "A"}
+                <Text style={{ color: "white", fontWeight: 700 }}>
+                  Get certificate
                 </Text>
-              </View>
-              <Text
-                style={{
-                  color: "#aaa",
-                  fontSize: 15,
-                  fontWeight: "500",
-                }}
-              >
-                {course.author.name}
-              </Text>
+              </Pressable>
             </View>
-          </View>
+          )
+        )}
 
-          {/* Section Header */}
+        {/* Course Header */}
+        <View style={{ marginBottom: 30 }}>
+          <Text
+            style={{
+              color: "#ffffff",
+              fontSize: 28,
+              fontWeight: "700",
+              marginBottom: 8,
+              lineHeight: 34,
+            }}
+          >
+            {course.title}
+          </Text>
           <View
             style={{
               flexDirection: "row",
               alignItems: "center",
-              gap: 10,
-              marginBottom: 20,
-              paddingBottom: 12,
-              borderBottomWidth: 2,
-              borderBottomColor: "#1a1a1a",
+              gap: 8,
+              marginTop: 4,
+            }}
+          >
+            <View
+              style={{
+                width: 32,
+                height: 32,
+                borderRadius: 16,
+                backgroundColor: "#bb86fc",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <Text style={{ color: "#0a0a0a", fontWeight: "700" }}>
+                {course?.author?.name?.charAt(0).toUpperCase() ?? "A"}
+              </Text>
+            </View>
+            <Text
+              style={{
+                color: "#aaa",
+                fontSize: 15,
+                fontWeight: "500",
+              }}
+            >
+              {course.author.name}
+            </Text>
+          </View>
+        </View>
+
+        {/* Section Header */}
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            gap: 10,
+            marginBottom: 10,
+            paddingBottom: 12,
+            borderBottomWidth: 2,
+            borderBottomColor: "#1a1a1a",
+          }}
+        >
+          <Text
+            style={{
+              color: "#ffffff",
+              fontSize: 20,
+              fontWeight: "700",
+            }}
+          >
+            Course Content
+          </Text>
+          <View
+            style={{
+              backgroundColor: "#bb86fc",
+              paddingHorizontal: 10,
+              paddingVertical: 4,
+              borderRadius: 12,
             }}
           >
             <Text
               style={{
-                color: "#ffffff",
-                fontSize: 20,
+                color: "#0a0a0a",
+                fontSize: 12,
                 fontWeight: "700",
               }}
             >
-              Course Content
+              {learning.modules.reduce(
+                (acc, mod) => acc + mod.topics.length,
+                0
+              )}{" "}
+              Lessons
             </Text>
-            <View
-              style={{
-                backgroundColor: "#bb86fc",
-                paddingHorizontal: 10,
-                paddingVertical: 4,
-                borderRadius: 12,
-              }}
-            >
-              <Text
+          </View>
+        </View>
+      </View>
+      <ScrollView style={{ flex: 1, paddingHorizontal: 20 }}>
+        {/* Modules */}
+        <View style={{ gap: 32 }}>
+          {learning.modules.map((module, moduleIndex) => (
+            <View key={module.id}>
+              {/* Module Header */}
+              <View
                 style={{
-                  color: "#0a0a0a",
-                  fontSize: 12,
-                  fontWeight: "700",
+                  flexDirection: "row",
+                  alignItems: "center",
+                  gap: 12,
+                  marginBottom: 16,
                 }}
               >
-                {learning.modules.reduce(
-                  (acc, mod) => acc + mod.topics.length,
-                  0
-                )}{" "}
-                Lessons
-              </Text>
-            </View>
-          </View>
-
-          {/* Modules */}
-          <View style={{ gap: 32 }}>
-            {learning.modules.map((module, moduleIndex) => (
-              <View key={module.id}>
-                {/* Module Header */}
                 <View
                   style={{
-                    flexDirection: "row",
+                    width: 36,
+                    height: 36,
+                    borderRadius: 18,
+                    backgroundColor: "#1a1a1a",
+                    justifyContent: "center",
                     alignItems: "center",
-                    gap: 12,
-                    marginBottom: 16,
+                    borderWidth: 2,
+                    borderColor: "#2a2a2a",
                   }}
                 >
-                  <View
-                    style={{
-                      width: 36,
-                      height: 36,
-                      borderRadius: 18,
-                      backgroundColor: "#1a1a1a",
-                      justifyContent: "center",
-                      alignItems: "center",
-                      borderWidth: 2,
-                      borderColor: "#2a2a2a",
-                    }}
-                  >
-                    <Text
-                      style={{
-                        color: "#bb86fc",
-                        fontSize: 14,
-                        fontWeight: "700",
-                      }}
-                    >
-                      {moduleIndex + 1}
-                    </Text>
-                  </View>
                   <Text
                     style={{
-                      fontSize: 18,
-                      fontWeight: "600",
-                      color: `${module?.is_unlocked ? "#fff" : "#3b3b3bff"}`,
-                      flex: 1,
+                      color: "#bb86fc",
+                      fontSize: 14,
+                      fontWeight: "700",
                     }}
                   >
-                    {module.title}
+                    {moduleIndex + 1}
                   </Text>
                 </View>
-
-                {/* Topics */}
-                <View style={{ gap: 12 }}>
-                  {module.topics.map((topic, topicIndex) => (
-                    <Pressable
-                      onPress={()=>handleSelectTopic(topic,module)}
-                      key={topic.id}
-                      style={{
-                        backgroundColor: topic.is_completed
-                          ? "#0f0f0f"
-                          : "#1a1a1a",
-                        borderRadius: 16,
-                        padding: 16,
-                        borderWidth: 1,
-                        borderColor: topic.is_completed ? "#1a1a1a" : currentTopic.id===topic.id ? PURPLE:"#2a2a2a",
-                        flexDirection: "row",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        gap: 12,
-                      }}
-                    >
-                      <View style={{ flex: 1, gap: 4 }}>
-                        <View
-                          style={{
-                            flexDirection: "row",
-                            alignItems: "center",
-                            gap: 8,
-                          }}
-                        >
-                          <Text
-                            style={{
-                              color: "#666",
-                              fontSize: 12,
-                              fontWeight: "600",
-                            }}
-                          >
-                            {moduleIndex + 1}.{topicIndex + 1}
-                          </Text>
-                          <Text
-                            style={{
-                              fontSize: 16,
-                              fontWeight: "600",
-                              color: topic.is_completed ? "#666" : "#ffffff",
-                              flex: 1,
-                            }}
-                          >
-                            {topic.title}
-                          </Text>
-                        </View>
-                        {topicBadge(topic)}
-                      </View>
-
-                      {topic.is_completed ? (
-                        <View
-                          style={{
-                            width: 28,
-                            height: 28,
-                            borderRadius: 14,
-                            backgroundColor: "#0f3d0f",
-                            justifyContent: "center",
-                            alignItems: "center",
-                          }}
-                        >
-                          <Feather
-                            name="check"
-                            size={16}
-                            color="#4ade80"
-                            strokeWidth={3}
-                          />
-                        </View>
-                      ) : module?.is_unlocked ? (
-                        <View
-                          style={{
-                            width: 28,
-                            height: 28,
-                            borderRadius: 14,
-                            borderWidth: 2,
-                            borderColor: "#2a2a2a",
-                          }}
-                        />
-                      ) : (
-                        <View
-                          style={{
-                            width: 28,
-                            height: 28,
-                            borderRadius: 14,
-                            justifyContent: "center",
-                            alignItems: "center",
-                          }}
-                        >
-                          <Feather
-                            name="lock"
-                            size={16}
-                            color={PURPLE}
-                            strokeWidth={3}
-                          />
-                        </View>
-                      )}
-                    </Pressable>
-                  ))}
-                </View>
+                <Text
+                  style={{
+                    fontSize: 18,
+                    fontWeight: "600",
+                    color: "#fff",
+                    flex: 1,
+                  }}
+                >
+                  {module.title}
+                </Text>
               </View>
-            ))}
-          </View>
+
+              {/* Topics */}
+              <View style={{ gap: 12 }}>
+                {module.topics.map((topic, topicIndex) => (
+                  <Pressable
+                    onPress={() => handleSelectTopic(topic, module)}
+                    key={topic.id}
+                    style={{
+                      backgroundColor: topic.is_completed
+                        ? "#0f0f0f"
+                        : "#1a1a1a",
+                      borderRadius: 16,
+                      padding: 16,
+                      borderWidth: 1,
+                      borderColor: topic.is_completed
+                        ? "#1a1a1a"
+                        : currentTopic && currentTopic.id === topic.id
+                        ? PURPLE
+                        : "#2a2a2a",
+                      flexDirection: "row",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      gap: 12,
+                    }}
+                  >
+                    <View style={{ flex: 1, gap: 4 }}>
+                      <View
+                        style={{
+                          flexDirection: "row",
+                          alignItems: "center",
+                          gap: 8,
+                        }}
+                      >
+                        <Text
+                          style={{
+                            color: "#666",
+                            fontSize: 12,
+                            fontWeight: "600",
+                          }}
+                        >
+                          {moduleIndex + 1}.{topicIndex + 1}
+                        </Text>
+                        <Text
+                          style={{
+                            fontSize: 16,
+                            fontWeight: "600",
+                            color: topic.is_completed ? "#666" : "#ffffff",
+                            flex: 1,
+                          }}
+                        >
+                          {topic.title}
+                        </Text>
+                      </View>
+                      {topicBadge(topic)}
+                    </View>
+
+                    {topic.is_completed ? (
+                      <View
+                        style={{
+                          width: 28,
+                          height: 28,
+                          borderRadius: 14,
+                          backgroundColor: "#0f3d0f",
+                          justifyContent: "center",
+                          alignItems: "center",
+                        }}
+                      >
+                        <Feather
+                          name="check"
+                          size={16}
+                          color="#4ade80"
+                          strokeWidth={3}
+                        />
+                      </View>
+                    ) : module?.is_unlocked ? (
+                      <View
+                        style={{
+                          width: 28,
+                          height: 28,
+                          borderRadius: 14,
+                          borderWidth: 2,
+                          borderColor: "#2a2a2a",
+                        }}
+                      />
+                    ) : (
+                      <View
+                        style={{
+                          width: 28,
+                          height: 28,
+                          borderRadius: 14,
+                          justifyContent: "center",
+                          alignItems: "center",
+                        }}
+                      >
+                        <Feather
+                          name="lock"
+                          size={16}
+                          color={PURPLE}
+                          strokeWidth={3}
+                        />
+                      </View>
+                    )}
+                  </Pressable>
+                ))}
+              </View>
+            </View>
+          ))}
         </View>
       </ScrollView>
     </SafeAreaView>

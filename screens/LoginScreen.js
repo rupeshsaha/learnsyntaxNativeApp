@@ -327,7 +327,7 @@ const LoginScreen = ({ route }) => {
                 alignItems: "center",
               }}
             >
-              <AntDesign name="apple1" size={24} color="white" />
+              <AntDesign name="apple" size={24} color="white" />
             </Pressable>
           </View>
 
