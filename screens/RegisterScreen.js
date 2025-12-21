@@ -8,9 +8,11 @@ import {
 import React, { useState } from "react";
 import { Feather, AntDesign, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
-import { baseUrl, PURPLE } from "../lib/constants";
+import { baseUrl, DISABLED_PURPLE, PURPLE } from "../lib/constants";
 import Toast from "react-native-toast-message";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useSignupMutation, useVerifySignupOtpMutation } from "../services/api";
+
 
 const RegisterScreen = () => {
   const navigation = useNavigation();
@@ -30,80 +32,58 @@ const RegisterScreen = () => {
     setOtpValue(numericValue);
   };
 
+  const [signup, { isLoading }] = useSignupMutation();
+  const [verifySignupOtp] = useVerifySignupOtpMutation()
+  
+  
   const handleRegister = async () => {
     try {
-      if (!password?.trim() || !email?.trim() || !firstName?.trim()) {
+      if (!password?.trim() || !email?.trim() || !firstName?.trim() || !lastName.trim() || !contact.trim() ) {
         return Toast.show({
           type: "error",
           text1: "Error",
           text2: "All fields are required",
         });
       }
-      const res = await fetch(`${baseUrl}/auth/signup/`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email,
-          password,
-          first_name: firstName,
-          last_name: lastName,
-          contact_no: contact,
-        }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        return Toast.show({
-          type: "error",
-          text1: "Error",
-          text2: data.error ?? "Error creating account",
-        });
-      }
+
+      const res = await signup({first_name: firstName, last_name: lastName, contact_no: contact, email, password}).unwrap()
+      
 
       Toast.show({
         type: "success",
         text1: "Success",
-        text2: "OTP sent successfully",
+        text2: res.message ?? "OTP sent successfully",
       });
-      await AsyncStorage.setItem("session_id", data?.session_id);
+      await AsyncStorage.setItem("session_id", res?.session_id);
       setCurrentStage("verify_otp");
     } catch (error) {
       console.log(error);
-      alert("error while creating account", error);
+      Toast.show({
+        type: "error",
+        text1: "Error",
+        text2: error.data.error ?? error.error ?? "Error creating account",
+      });
     }
   };
 
   const handleVerifyOtp = async () => {
     try {
-      const res = await fetch(`${baseUrl}/auth/verify_signup_otp/`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          session_id: await AsyncStorage.getItem("session_id"),
-          otp: otpValue,
-        }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        console.log(data);
-        return Toast.show({
-          type: "error",
-          text1: "Error",
-          text2: data?.error ?? "Error verifying otp",
-        });
-      }
+      const res = await verifySignupOtp({otp: otpValue}).unwrap()
+      
 
       Toast.show({
         type: "success",
         text1: "Success",
-        text2: data?.message ?? "OTP verified and account created",
+        text2: res.message ?? "OTP verified and account created",
       });
       navigation.navigate("login", { data: { email, password } });
     } catch (error) {
       console.log(error);
+      Toast.show({
+        type: "error",
+        text1: "Error",
+        text2: error?.error ??  error?.data?.error ?? "Error verifying otp",
+      });
     }
   };
 
@@ -343,9 +323,10 @@ const RegisterScreen = () => {
 
             {/* Register Button */}
             <Pressable
-              onPress={handleRegister}
+            onPress={handleRegister}
+            disabled={isLoading}
               style={{
-                backgroundColor: PURPLE,
+                backgroundColor: isLoading? DISABLED_PURPLE : PURPLE,
                 height: 56,
                 borderRadius: 16,
                 justifyContent: "center",

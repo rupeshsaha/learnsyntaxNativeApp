@@ -8,7 +8,6 @@ import Featured from "./screens/_tabs/Featured";
 import MyLearning from "./screens/_tabs/MyLearning";
 import Account from "./screens/_tabs/Account";
 import CourseDetails from "./screens/CourseDetails";
-import { createContext,  useMemo, useState } from "react";
 import Checkout from "./screens/Checkout";
 import RegisterScreen from "./screens/RegisterScreen";
 import Toast, { BaseToast, ErrorToast } from "react-native-toast-message";
@@ -17,16 +16,13 @@ import ForgotPasswordScreen from "./screens/ForgotPasswordScreen";
 import LearningScreen from "./screens/LearningScreen";
 import QuizContent from "./screens/content/QuizContent";
 import TextContent from "./screens/content/TextContent";
+import { store } from "./store";
+import { Provider } from "react-redux";
 
 const Tabs = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
-export const CartContext = createContext({
-  items: [],
-  addItem: () => {},
-  removeItem: () => {},
-  clear: () => {},
-});
+
 
 const TabNav = () => {
   return (
@@ -75,24 +71,9 @@ const TabNav = () => {
 };
 
 const StackNav = () => {
-  const [items, setItems] = useState([]);
-
-  const value = useMemo(
-    () => ({
-      items,
-      addItem: (course) =>
-        setItems((prev) => {
-          const exists = prev.find((i) => i.id === course.id);
-          return exists ? prev : [...prev, course];
-        }),
-      removeItem: (id) => setItems((prev) => prev.filter((i) => i.id !== id)),
-      clear: () => setItems([]),
-    }),
-    [items]
-  );
+ 
 
   return (
-    <CartContext.Provider value={value}>
       <NavigationContainer>
         <Stack.Navigator
           initialRouteName={"main"}
@@ -113,7 +94,6 @@ const StackNav = () => {
           
         </Stack.Navigator>
       </NavigationContainer>
-    </CartContext.Provider>
   );
 };
 
@@ -152,9 +132,11 @@ const toastConfig = {
 
 export default function App() {
   return (
+    <Provider store={store}>
     <>
       <StackNav />
       <Toast config={toastConfig} />
     </>
+     </Provider>
   );
 }

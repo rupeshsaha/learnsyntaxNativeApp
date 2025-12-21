@@ -5,14 +5,12 @@ import {
   ScrollView,
   Pressable,
   ActivityIndicator,
-  Linking,
 } from "react-native";
-import React, { createContext, useContext, useEffect, useState } from "react";
+import {  useEffect, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { AntDesign, FontAwesome5 } from "@expo/vector-icons";
 import { baseUrl, PURPLE } from "../lib/constants";
 import Rating from "../components/Rating";
-import { CartContext } from "../App";
 import { useNavigation } from "@react-navigation/native";
 import Toast from "react-native-toast-message";
 import Cirriculum from "../components/Cirriculum";
@@ -28,7 +26,6 @@ const CourseDetails = ({ route }) => {
     advanced: <FontAwesome5 name="tree" size={14} color="white" />,
   };
 
-  const [existsInCart, setExistsInCart] = useState(false);
   const [course, setCourse] = useState();
 
   const handleCheckout = async () => {
@@ -86,16 +83,10 @@ const CourseDetails = ({ route }) => {
     fetchCourseDetails();
   }, []);
 
-  const { addItem, items } = useContext(CartContext);
 
-  useEffect(() => {
-    alreadyExistsInCart();
-  }, [items]);
+ 
 
-  const alreadyExistsInCart = () => {
-    const exists = items.find((item) => item.id === course.id);
-    if (exists) setExistsInCart(true);
-  };
+  
 
   if (!course)
     return (

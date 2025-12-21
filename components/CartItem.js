@@ -2,12 +2,10 @@ import { View, Text, Image, Pressable } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import Rating from "./Rating";
 import { PURPLE } from "../lib/constants";
-import { useContext } from "react";
-import { CartContext } from "../App";
+
 
 const CartItem = ({ data,  }) => {
   const navigation = useNavigation();
-  const { items, removeItem } = useContext(CartContext);
   return (
     <View style={{ width: "100%", gap: 10, alignItems: "center" }}>
       <View
@@ -36,7 +34,7 @@ const CartItem = ({ data,  }) => {
               55 total hours • 500 lectures • Beginner Level
             </Text>
             <View style={{ flexDirection: "row", gap: 10 }}>
-              <Pressable onPress={() => removeItem(data.id)}>
+              <Pressable onPress={() => {}}>
                 <Text
                   style={{ color: PURPLE, fontWeight: "light", fontSize: 12 }}
                 >

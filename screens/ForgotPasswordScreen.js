@@ -53,7 +53,7 @@ const ForgotPasswordScreen = () => {
         text1: "Success",
         text2: data.message,
       });
-      setCurrentStage("verify_otp");
+      setCurrentStage("reset_password");
     } catch (error) {
       console.log(error);
     } finally {
@@ -61,43 +61,7 @@ const ForgotPasswordScreen = () => {
     }
     };
     
-    const handleVerifyOtp = async () => {
-       try {
-         const res = await fetch(`${baseUrl}/auth/verify_otp/`,
-             {
-                 method: "POST",
-                 headers: {
-                     "Content-Type": "application/json"
-                 },
-                 body: JSON.stringify({email: identifier, username: identifier, otp: OtpValue})
-             }
-           )
-           if (!res.ok) {
-               return Toast.show({
-                 type: "error",
-                 text1: "Error",
-                 text2: "Error while verifying OTP",
-               }); 
-           }
-           const data = await res.json()
-           if (data.error) {
-                return Toast.show({
-                  type: "error",
-                  text1: "Error",
-                  text2: data.error,
-                }); 
-           }
-           Toast.show({
-             type: "success",
-             text1: "Success",
-             text2: data.message,
-           });
-           setCurrentStage("reset_password")
-           
-       } catch (error) {
-           console.log(error);
-       }
-    } 
+    
     
     const handleResetPassword = async () => {
         console.log(identifier, newPassword)
@@ -109,7 +73,7 @@ const ForgotPasswordScreen = () => {
              },
              body: JSON.stringify({
                email: identifier.trim(),
-               username: identifier.trim(),
+               otp: OtpValue,
                new_password: newPassword,
              }),
            });
@@ -127,7 +91,7 @@ const ForgotPasswordScreen = () => {
              text1: "Success",
              text2: data.message,
            });
-           navigation.navigate("login",{data:{identifier,newPassword}})
+           navigation.navigate("login",{data:{email:identifier,password:newPassword}})
          } catch (error) {
            console.log(error);
          }
@@ -213,78 +177,6 @@ const ForgotPasswordScreen = () => {
         </View>
       </View>
     );
-  } else if (currentStage === "verify_otp") {
-    return (
-      <View
-        style={{
-          justifyContent: "center",
-          alignItems: "center",
-          backgroundColor: "black",
-          minHeight: "100%",
-          gap: 25,
-        }}
-      >
-        <Text
-          style={{
-            fontWeight: 700,
-            fontSize: 20,
-            color: "white",
-            textAlign: "center",
-            marginBottom: 20,
-          }}
-        >
-          Verify OTP
-        </Text>
-
-        <TextInput
-          style={{
-            height: 40,
-            minWidth: "90%",
-            borderBottomWidth: 2,
-            borderBottomColor: "white",
-            color: "white",
-          }}
-          placeholderTextColor={"white"}
-          placeholder="Enter OTP"
-          keyboardType="number-pad"
-          value={OtpValue}
-          onChangeText={handleNumericChange}
-        />
-
-        <Pressable
-          onPress={() => handleVerifyOtp()}
-          style={{
-            backgroundColor: PURPLE,
-            width: "90%",
-            height: 50,
-            justifyContent: "center",
-            alignItems: "center",
-            flexDirection: "row",
-            gap: 8,
-          }}
-        >
-          <Text style={{ color: "white", fontSize: 18, fontWeight: 700 }}>
-            Verify OTP
-          </Text>
-        </Pressable>
-
-        <View
-          style={{
-            flexDirection: "row",
-            gap: 10,
-            justifyContent: "space-around",
-          }}
-        >
-        
-
-          <Pressable onPress={() => setCurrentStage("send_otp")}>
-            <Text style={{ color: PURPLE, fontWeight: "bold" }}>
-              Change Email / Username
-            </Text>
-          </Pressable>
-        </View>
-      </View>
-    );
   } else if (currentStage === "reset_password") {
        return (
          <View
@@ -308,6 +200,20 @@ const ForgotPasswordScreen = () => {
              Reset Password
            </Text>
 
+          
+           <TextInput
+             style={{
+               height: 40,
+               minWidth: "90%",
+               borderBottomWidth: 2,
+               borderBottomColor: "white",
+               color: "white",
+             }}
+             placeholderTextColor={"white"}
+             placeholder="Enter OTP"
+             value={OtpValue}
+             onChangeText={handleNumericChange}
+           />
            <TextInput
              style={{
                height: 40,
