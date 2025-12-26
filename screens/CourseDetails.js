@@ -6,9 +6,9 @@ import {
   Pressable,
   ActivityIndicator,
 } from "react-native";
-import {  useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { AntDesign, FontAwesome5 } from "@expo/vector-icons";
+import { AntDesign } from "@expo/vector-icons";
 import { baseUrl, PURPLE } from "../lib/constants";
 import Rating from "../components/Rating";
 import { useNavigation } from "@react-navigation/native";
@@ -17,14 +17,8 @@ import Cirriculum from "../components/Cirriculum";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const CourseDetails = ({ route }) => {
-  const { id } = route.params;
+  const { slug } = route.params;
   const navigation = useNavigation();
-
-  const levelIcons = {
-    beginner: <FontAwesome5 name="seedling" size={14} color="white" />,
-    intermediate: <FontAwesome5 name="leaf" size={14} color="white" />,
-    advanced: <FontAwesome5 name="tree" size={14} color="white" />,
-  };
 
   const [course, setCourse] = useState();
 
@@ -37,13 +31,12 @@ const CourseDetails = ({ route }) => {
           "Content-Type": "application/json",
           Authorization: `Token ${token}`,
         },
-        body: JSON.stringify({ course_id: id }),
+        body: JSON.stringify({ course_id: course.id }),
       });
       const data = await res.json();
-      console.log(res.status)
       if (res.status === 401) {
-     return navigation.navigate("login")
-   }
+        return navigation.navigate("login");
+      }
       if (!res.ok) {
         return Toast.show({
           type: "error",
@@ -52,7 +45,7 @@ const CourseDetails = ({ route }) => {
         });
       }
 
-      const checkoutUri = `${baseUrl}/payment/webview/?order_id=${data?.gateway_order_id}&amount=${course.discount_price}&course_id=${id}`;
+      const checkoutUri = `${baseUrl}/payment/webview/?order_id=${data?.gateway_order_id}&amount=${course.discount_price}&course_id=${course.id}`;
 
       navigation.navigate("checkout", { uri: checkoutUri });
     } catch (error) {
@@ -62,7 +55,7 @@ const CourseDetails = ({ route }) => {
 
   const fetchCourseDetails = async () => {
     try {
-      const res = await fetch(`${baseUrl}/course/${id}/`);
+      const res = await fetch(`${baseUrl}/course/${slug}/`);
       const data = await res.json();
       if (!res.ok) {
         return Toast.show({
@@ -82,11 +75,6 @@ const CourseDetails = ({ route }) => {
   useEffect(() => {
     fetchCourseDetails();
   }, []);
-
-
- 
-
-  
 
   if (!course)
     return (
@@ -147,12 +135,6 @@ const CourseDetails = ({ route }) => {
             <Text style={{ color: "white", fontSize: 14 }}>
               {course?.language}
             </Text>
-          </View>
-
-          <View style={{ flexDirection: "row", gap: 6, alignItems: "center" }}>
-            {levelIcons[course?.author?.name] || null}
-
-            <Text style={{ color: "white", fontSize: 14 }}>{course.level}</Text>
           </View>
         </View>
 

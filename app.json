@@ -4,6 +4,7 @@
     "slug": "learnsyntax",
     "version": "1.0.0",
     "orientation": "portrait",
+    "scheme": "com.learnsyntax.app",
     "icon": "./assets/LearnSyntax.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
@@ -12,19 +13,25 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-     "android": {
+    "android": {
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.learnsyntax.app"
     },
     "ios": {
       "supportsTablet": true
     },
-    
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      "expo-video"
-    ]
+      "expo-web-browser"
+    ],
+    "owner": "rupeshsaha",
+    "extra": {
+      "eas": {
+        "projectId": "689f4753-a23f-44be-be08-4049f2f74ecc"
+      }
+    }
   }
 }

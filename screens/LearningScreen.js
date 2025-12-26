@@ -6,32 +6,13 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Feather, FontAwesome5 } from "@expo/vector-icons";
 import { useVideoPlayer, VideoView } from "expo-video";
 import Toast from "react-native-toast-message";
-import { useNavigation } from "@react-navigation/native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
+import { markAsComplete } from "../utils/markAsCompleted";
 
-const markAsComplete = async (topicId) => {
-  try {
-    const res = await fetch(`${baseUrl}/content/${topicId}/complete/`, {
-      method: "POST",
-      headers: {
-        Authorization: `Token ${await AsyncStorage.getItem("token")}`,
-      },
-    });
 
-    if (res.ok) {
-      Toast.show({
-        type: "success",
-        text1: "Completed",
-        text2: "Topic completed successfully",
-      });
-    }
-  } catch (error) {
-    console.log(error);
-  }
-};
 
-const Content = ({ topic }) => {
+const Content = ({ topic,setProgressPercentage }) => {
   const isVideo = topic.type === "video";
-  const [progressPercentage, setProgressPercentage] = useState(0);
   const navigation = useNavigation();
 
   const player = useVideoPlayer(isVideo ? topic.video_url : null, (player) => {
@@ -45,9 +26,7 @@ const Content = ({ topic }) => {
     const interval = setInterval(() => {
       setProgressPercentage((player?.currentTime / player?.duration) * 100);
 
-      if (progressPercentage > 90) {
-        markAsComplete(topic?.id);
-      }
+    
     }, 5 * 1000);
     return () => clearInterval(interval);
   }, [player]);
@@ -106,14 +85,16 @@ const Content = ({ topic }) => {
 };
 
 const LearningScreen = ({ route }) => {
-  const { id } = route.params;
+  const { slug } = route.params;
   const [learning, setLearning] = useState("");
   const [course, setCourse] = useState("");
   const [currentTopic, setCurrentTopic] = useState();
+    const [progressPercentage, setProgressPercentage] = useState(0);
+
 
   const fetchLearning = async () => {
     try {
-      const res = await fetch(`${baseUrl}/course/${id}/learning`, {
+      const res = await fetch(`${baseUrl}/course/${slug}/learning`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -140,7 +121,7 @@ const LearningScreen = ({ route }) => {
 
   const fetchCourseDetails = async () => {
     try {
-      const res = await fetch(`${baseUrl}/course/${id}/`);
+      const res = await fetch(`${baseUrl}/course/${slug}/`);
       const data = await res.json();
       if (!res.ok) {
         return Toast.show({
@@ -159,9 +140,19 @@ const LearningScreen = ({ route }) => {
   };
 
   useEffect(() => {
-    fetchLearning();
     fetchCourseDetails();
-  }, [id]);
+  }, [slug]);
+
+   useFocusEffect(
+     React.useCallback(() => {
+       // Do something when the screen is focused
+       fetchLearning();
+       return () => {
+         // Do something when the screen is unfocused
+         // Useful for cleanup functions
+       };
+     }, [])
+   );
 
   const topicBadge = (topic) => {
     const isCompleted = topic.is_completed;
@@ -252,7 +243,7 @@ const LearningScreen = ({ route }) => {
         }}
       >
         {currentTopic ? (
-          <Content topic={currentTopic} />
+          <Content topic={currentTopic} setProgressPercentage={setProgressPercentage} />
         ) : (
           <Image
             source={{ uri: course?.image_url }}
@@ -263,7 +254,7 @@ const LearningScreen = ({ route }) => {
       </View>
 
       <View style={{ paddingHorizontal: 20 }}>
-        {currentTopic && learning && !currentTopic.is_completed ? (
+        {currentTopic && learning && !currentTopic.is_completed && (currentTopic.type === "video"? progressPercentage>90: true) ? (
           <View
             style={{
               justifyContent: "flex-end",

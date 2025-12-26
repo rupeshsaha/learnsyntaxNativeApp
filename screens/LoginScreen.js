@@ -25,8 +25,15 @@ const LoginScreen = ({ route }) => {
 
   const [login, { isLoading }] = useLoginMutation();
 
+
+  
+
   const handleLogin = async () => {
     try {
+      //remove old garbage sessions
+
+      await AsyncStorage.removeItem("token");
+      
       if (!email?.trim() || !password?.trim()) {
         return Toast.show({
           type: "error",
@@ -275,20 +282,6 @@ const LoginScreen = ({ route }) => {
             marginBottom: 32,
           }}
         >
-          <Pressable
-            style={{
-              width: 64,
-              height: 64,
-              borderRadius: 16,
-              backgroundColor: "rgba(255, 255, 255, 0.05)",
-              borderWidth: 1,
-              borderColor: "rgba(255, 255, 255, 0.1)",
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            <AntDesign name="google" size={24} color="white" />
-          </Pressable>
           <Pressable
             style={{
               width: 64,

@@ -56,7 +56,7 @@ const MyLearning = () => {
           (courses.map((course, i) => {
           return  (
             <Pressable
-            onPress={()=>navigation.navigate("learning",{id:course?.id})}
+            onPress={()=>navigation.navigate("learning",{slug:course?.slug})}
               key={i} style={{ flexDirection: "row", gap: 8 }}>
               <Image
                 source={{ uri: course.image_url }}

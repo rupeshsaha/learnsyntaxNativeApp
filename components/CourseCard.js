@@ -9,7 +9,7 @@ const CourseCard = ({ course }) => {
   const navigation = useNavigation();
 
   const handlePress = () =>
-    navigation.navigate("Course details", { id: course.id });
+    navigation.navigate("Course details", { slug: course.slug });
 
   return (
     <View

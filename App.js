@@ -18,6 +18,7 @@ import QuizContent from "./screens/content/QuizContent";
 import TextContent from "./screens/content/TextContent";
 import { store } from "./store";
 import { Provider } from "react-redux";
+import QuizQuestions from "./screens/content/QuizQuestions";
 
 const Tabs = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -74,26 +75,23 @@ const StackNav = () => {
  
 
   return (
-      <NavigationContainer>
-        <Stack.Navigator
-          initialRouteName={"main"}
-          screenOptions={{ headerShown: false }}
-        >
-          <Stack.Screen name="login" component={LoginScreen} />
-          <Stack.Screen name="register" component={RegisterScreen} />
-          <Stack.Screen
-            name="forgotpassword"
-            component={ForgotPasswordScreen}
-          />
-          <Stack.Screen name="main" component={TabNav} />
-          <Stack.Screen name="Course details" component={CourseDetails} />
-          <Stack.Screen name="checkout" component={Checkout} />
-          <Stack.Screen name="learning" component={LearningScreen} />
-          <Stack.Screen name="quiz_content" component={QuizContent} />
-          <Stack.Screen name="text_content" component={TextContent} />
-          
-        </Stack.Navigator>
-      </NavigationContainer>
+    <NavigationContainer>
+      <Stack.Navigator
+        initialRouteName={"main"}
+        screenOptions={{ headerShown: false }}
+      >
+        <Stack.Screen name="login" component={LoginScreen} />
+        <Stack.Screen name="register" component={RegisterScreen} />
+        <Stack.Screen name="forgotpassword" component={ForgotPasswordScreen} />
+        <Stack.Screen name="main" component={TabNav} />
+        <Stack.Screen name="Course details" component={CourseDetails} />
+        <Stack.Screen name="checkout" component={Checkout} />
+        <Stack.Screen name="learning" component={LearningScreen} />
+        <Stack.Screen name="quiz_content" component={QuizContent} />
+        <Stack.Screen name="quiz_questions" component={QuizQuestions} />
+        <Stack.Screen name="text_content" component={TextContent} />
+      </Stack.Navigator>
+    </NavigationContainer>
   );
 };
 
