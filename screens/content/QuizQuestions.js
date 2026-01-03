@@ -6,7 +6,7 @@ import Toast from "react-native-toast-message";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const QuizQuestions = ({ route }) => {
-  const id = 25;
+  const {id} = route.params
   const [questions, setQuestions] = useState([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedOption, setSelectedOption] = useState(null);
@@ -21,7 +21,8 @@ const QuizQuestions = ({ route }) => {
 
   const fetchQuestions = async () => {
     try {
-      const res = await fetch(`${baseUrl}/quiz/${id}/details/`, {
+      console.log(id)
+      const res = await fetch(`${baseUrl}/quiz/${id}/start/`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",

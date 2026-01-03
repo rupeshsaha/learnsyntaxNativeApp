@@ -51,11 +51,12 @@ const TextContent = ({ route }) => {
       setLoading(false);
     }
   };
-
+  
   useEffect(() => {
     fetchContent();
   }, [id]);
-
+  
+  const navigation = useNavigation()
   const increaseFontSize = () => {
     if (fontSize < 24) setFontSize(fontSize + 2);
   };
@@ -84,7 +85,6 @@ const TextContent = ({ route }) => {
   const cleanText = removeMarkdown(data.text);
   const estimatedReadTime = Math.ceil(cleanText.split(" ").length / 200);
 
-  const navigation = useNavigation()
 
   return (
     <SafeAreaView style={{ backgroundColor: "#0a0a0a", flex: 1 }}>
@@ -238,6 +238,7 @@ const TextContent = ({ route }) => {
         <Pressable
           onPress={() => {
             markAsComplete(data.id)
+            if(navigation.canGoBack())
             navigation.goBack()
           }}
           style={({ pressed }) => ({

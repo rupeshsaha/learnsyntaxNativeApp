@@ -4,7 +4,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Entypo, Feather } from "@expo/vector-icons";
 import { baseUrl, PURPLE } from "../../lib/constants";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useNavigation } from "@react-navigation/native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 
 const MyLearning = () => {
   const [courses, setCourses] = useState("");
@@ -27,9 +27,20 @@ const MyLearning = () => {
      }
    };
 
-   useEffect(() => {
-     fetchCourses();
-   }, []);
+  //  useEffect(() => {
+  //    fetchCourses();
+  //  }, []);
+
+   useFocusEffect(
+       React.useCallback(() => {
+         // Do something when the screen is focused
+         fetchCourses();
+         return () => {
+           // Do something when the screen is unfocused
+           // Useful for cleanup functions
+         };
+       }, [])
+     );
   return (
     <SafeAreaView
       style={{

@@ -12,6 +12,7 @@ import CourseList from "../../components/CourseList";
 import { baseUrl, PURPLE } from "../../lib/constants";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useFocusEffect } from "@react-navigation/native";
 
 const Featured = () => {
   const [categories, setCategories] = useState("");
@@ -31,9 +32,22 @@ const Featured = () => {
      }
     }
   
-    useEffect(() => {
-      fetchCourses()
-    }, [searchQuery]);
+    // useEffect(() => {
+    //   fetchCourses()
+    // }, [searchQuery]);
+  
+   useFocusEffect(
+       React.useCallback(() => {
+         // Do something when the screen is focused
+         fetchCourses();
+         return () => {
+           // Do something when the screen is unfocused
+           // Useful for cleanup functions
+         };
+       }, [searchQuery])
+     );
+  
+  
 
   const fetchCategories = async () => {
     try {
